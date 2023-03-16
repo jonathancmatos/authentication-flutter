@@ -1,0 +1,6 @@
+{
+    "response": {
+        "type": "created_success",
+        "message": "Usuário cadastrado com sucesso."
+    }
+}

@@ -6,20 +6,17 @@
     "configurations": [
         {
             "name": "authentication_flutter",
-            "cwd": "authentication_flutter",
             "request": "launch",
             "type": "dart"
         },
         {
             "name": "authentication_flutter (profile mode)",
-            "cwd": "authentication_flutter",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
             "name": "authentication_flutter (release mode)",
-            "cwd": "authentication_flutter",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

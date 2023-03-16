@@ -1,0 +1,6 @@
+{
+    "response": {
+        "type": "invalid_data",
+        "message": "O e-mail informado já existe."
+    }
+}

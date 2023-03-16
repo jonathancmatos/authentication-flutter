@@ -20,13 +20,20 @@ dependencies:
 
   cupertino_icons: ^1.0.2
   flutter_modular: ^5.0.3
-
+  equatable: ^2.0.5
+  fpdart: ^0.5.0
+  internet_connection_checker: ^1.0.0+1
+  dio: ^5.0.2
+  flutter_mobx: ^2.0.6+5
 
 dev_dependencies:
+  build_runner: ^2.3.2
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^2.0.0
+  mockito: ^5.3.2
+
 
 
 # The following section is specific to Flutter packages.
