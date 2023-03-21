@@ -7,8 +7,8 @@ const _typeError = "Error";
 const _messageError = "O servidor retornou um erro inesperado.";
 
 ServerException serverExceptionConverted(Response? response) {
-  if (response != null) {
-    final error = (json.decode(response.data));
+  if (response != null && response.data != null) {
+    final error = response.data;
     return ServerException(
       code: response.statusCode ?? _codeError,
       type: error["response"]["type"] ?? _typeError,

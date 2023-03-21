@@ -5,8 +5,16 @@ abstract class Failure extends Equatable {
 }
 
 class ServerFailure extends Failure {
+  final String type;
+  final String message;
+
+  const ServerFailure({
+    required this.type,
+    required this.message,
+  });
+
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [type, message];
 }
 
 class InternalFailure extends Failure {

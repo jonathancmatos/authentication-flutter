@@ -76,7 +76,10 @@ void main() {
       //assert
       verify(dataSource.signUp(model));
       verifyNoMoreInteractions(dataSource);
-      expect(result, equals(left(ServerFailure())));
+      expect(result, equals(left(const ServerFailure(
+        type: "Error",
+        message: "Error Message"
+      ))));
     });
   });
 }

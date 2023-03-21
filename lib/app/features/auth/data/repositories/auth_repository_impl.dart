@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/core/network/network_info.dart';
 import 'package:authentication_flutter/app/features/auth/data/datasources/auth_datasource.dart';
@@ -32,8 +30,8 @@ class AuthRepositoryImpl implements AuthRepository {
           return Right(result!);
         } on InternalException {
           return Left(InternalFailure());
-        } on ServerException {
-          return Left(ServerFailure());
+        } on ServerException catch (e) {
+          return Left(ServerFailure(type: e.type, message: e.message));
         } on NoConnectionException {
           return Left(NoConnectionFailure());
         }

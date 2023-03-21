@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-const String baseUrl = "http://192.168.0.6/api-tokenization/api";
+const String baseUrl = "http://192.168.0.10/api-tokenization/api";
 
 abstract class HttpService {
   Future<Response<T>> get<T>(String? url);

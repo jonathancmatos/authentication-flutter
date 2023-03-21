@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/features/auth/data/datasources/auth_datasource.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
@@ -41,7 +43,7 @@ void main() {
     test('should return Server Exception when registering a new user ',
         () async {
       //arrange
-      final response = fixture("authetication/created_account_error.json");
+      final response = json.decode(fixture("authetication/created_account_error.json"));
       when(mockHttpService.post(any, data: anyNamed('data'))).thenThrow(
         DioError(
           requestOptions: RequestOptions(),

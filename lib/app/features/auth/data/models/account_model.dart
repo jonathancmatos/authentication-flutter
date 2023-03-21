@@ -1,4 +1,5 @@
 import 'package:authentication_flutter/app/features/auth/domain/entities/new_account_entity.dart';
+import 'package:authentication_flutter/app/utils/utils.dart';
 
 class AccountModel extends NewAccountEntity {
 
@@ -18,8 +19,8 @@ class AccountModel extends NewAccountEntity {
     return {
       "name":name,
       "email":email,
-      "passwd":passwd,
-      "phone":phone
+      "passwd": passwd,
+      "phone": leaveOnlyNumber(phone)
     };
   }
 
