@@ -1,3 +1,4 @@
+import 'package:authentication_flutter/app/core/manager/session_manager.dart';
 import 'package:authentication_flutter/app/core/network/network_info.dart';
 import 'package:authentication_flutter/app/features/auth/data/datasources/auth_datasource.dart';
 import 'package:authentication_flutter/app/features/auth/domain/repositories/auth_repository.dart';
@@ -11,6 +12,7 @@ import 'package:mockito/annotations.dart';
   AuthRepository,
   AuthDataSource,
   NetworkInfo,
+  SessionManager,
 ])
 
 void main() {}

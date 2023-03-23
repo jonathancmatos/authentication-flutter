@@ -1,8 +1,8 @@
 import 'dart:convert';
-
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/features/auth/data/datasources/auth_datasource.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
+import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -43,7 +43,8 @@ void main() {
     test('should return Server Exception when registering a new user ',
         () async {
       //arrange
-      final response = json.decode(fixture("authetication/created_account_error.json"));
+      final response =
+          json.decode(fixture("authetication/created_account_error.json"));
       when(mockHttpService.post(any, data: anyNamed('data'))).thenThrow(
         DioError(
           requestOptions: RequestOptions(),
@@ -57,7 +58,49 @@ void main() {
       //act
       final call = authDataSource.signUp;
       //assert
-      expect(() async => await call(model),throwsA(isA<ServerException>()));
+      expect(() async => await call(model), throwsA(isA<ServerException>()));
+    });
+  });
+
+  group('signIn', () {
+    const model = SignInModel(
+      email: 'contato@devjonathancosta.com',
+      passwd: '123456768',
+    );
+
+    test('should return map with tokens on success', () async {
+      //arrange
+      final response = fixture("authetication/login_success.json");
+      when(mockHttpService.post(any, data: anyNamed('data')))
+          .thenAnswer((_) async => Response(
+                data: response,
+                statusCode: 200,
+                requestOptions: RequestOptions(),
+              ));
+      //act
+      final result = await authDataSource.signIn(model);
+      //assert
+      expect(result, equals(isA<Map>()));
+      expect(result?["access_token"], json.decode(response)["access_token"]);
+    });
+
+    test('should return internal fault when status code equals 400', () async {
+      //arrange
+      final response = json.decode(fixture("authetication/login_error.json"));
+      when(mockHttpService.post(any, data: anyNamed('data'))).thenThrow(
+        DioError(
+          requestOptions: RequestOptions(),
+          response: Response(
+            data: response,
+            statusCode: 400,
+            requestOptions: RequestOptions(),
+          ),
+        ),
+      );
+      //act
+      final call = authDataSource.signIn;
+      //assert
+      expect(() async => await call(model), throwsA(isA<ServerException>()));
     });
   });
 }

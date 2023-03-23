@@ -1,0 +1,6 @@
+{
+    "response": {
+        "type": "Error",
+        "message": "E-mail ou Senha não são válidos."
+    }
+}

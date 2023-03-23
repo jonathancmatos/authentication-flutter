@@ -6,14 +6,20 @@
 import 'dart:async' as _i4;
 
 import 'package:authentication_flutter/app/core/error/failure.dart' as _i7;
+import 'package:authentication_flutter/app/core/manager/session_manager.dart'
+    as _i15;
 import 'package:authentication_flutter/app/core/network/network_info.dart'
-    as _i12;
+    as _i14;
 import 'package:authentication_flutter/app/features/auth/data/datasources/auth_datasource.dart'
-    as _i10;
-import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart'
     as _i11;
+import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart'
+    as _i12;
+import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart'
+    as _i13;
 import 'package:authentication_flutter/app/features/auth/domain/entities/new_account_entity.dart'
     as _i8;
+import 'package:authentication_flutter/app/features/auth/domain/entities/sign_in_entity.dart'
+    as _i10;
 import 'package:authentication_flutter/app/features/auth/domain/repositories/auth_repository.dart'
     as _i9;
 import 'package:authentication_flutter/app/features/auth/domain/usercases/new_account.dart'
@@ -246,28 +252,41 @@ class MockAuthRepository extends _i1.Mock implements _i9.AuthRepository {
         #signUp,
         [account],
       )) as _i4.Future<_i6.Either<_i7.Failure, bool>>?);
+  @override
+  _i4.Future<_i6.Either<_i7.Failure, bool>>? signIn(
+          _i10.SignInEntity? signIn) =>
+      (super.noSuchMethod(Invocation.method(
+        #signIn,
+        [signIn],
+      )) as _i4.Future<_i6.Either<_i7.Failure, bool>>?);
 }
 
 /// A class which mocks [AuthDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuthDataSource extends _i1.Mock implements _i10.AuthDataSource {
+class MockAuthDataSource extends _i1.Mock implements _i11.AuthDataSource {
   MockAuthDataSource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<bool>? signUp(_i11.AccountModel? model) =>
+  _i4.Future<bool>? signUp(_i12.AccountModel? model) =>
       (super.noSuchMethod(Invocation.method(
         #signUp,
         [model],
       )) as _i4.Future<bool>?);
+  @override
+  _i4.Future<Map<String, dynamic>>? signIn(_i13.SignInModel? model) =>
+      (super.noSuchMethod(Invocation.method(
+        #signIn,
+        [model],
+      )) as _i4.Future<Map<String, dynamic>>?);
 }
 
 /// A class which mocks [NetworkInfo].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockNetworkInfo extends _i1.Mock implements _i12.NetworkInfo {
+class MockNetworkInfo extends _i1.Mock implements _i14.NetworkInfo {
   MockNetworkInfo() {
     _i1.throwOnMissingStub(this);
   }
@@ -277,4 +296,41 @@ class MockNetworkInfo extends _i1.Mock implements _i12.NetworkInfo {
         Invocation.getter(#isConnected),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
+}
+
+/// A class which mocks [SessionManager].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSessionManager extends _i1.Mock implements _i15.SessionManager {
+  MockSessionManager() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<void> setAccessToken(String? value) => (super.noSuchMethod(
+        Invocation.method(
+          #setAccessToken,
+          [value],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+  @override
+  _i4.Future<void> setRefreshToken(String? value) => (super.noSuchMethod(
+        Invocation.method(
+          #setRefreshToken,
+          [value],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+  @override
+  _i4.Future<void> logout() => (super.noSuchMethod(
+        Invocation.method(
+          #logout,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 }
