@@ -86,7 +86,7 @@ abstract class _SignUpStoreBase with Store {
       _loading = false;
       signUpOrFailure?.fold(
         (failure) => _onFailure(failureInExeptionConverted(failure)),
-        (success) => _onSuccess,
+        (success) => _onSuccess(),
       );
     }
   }

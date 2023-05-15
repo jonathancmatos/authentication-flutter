@@ -45,7 +45,7 @@ class AuthDataSourceImpl extends AuthDataSource {
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.data);
+        return response.data;
       }
       return {};
     } on DioError catch (e) {

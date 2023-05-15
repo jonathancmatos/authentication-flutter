@@ -1,12 +1,31 @@
 import 'package:authentication_flutter/app/services/http/http_service.dart';
+import 'package:authentication_flutter/app/services/http/interceptors/my_http_interceptor.dart';
 import 'package:dio/dio.dart';
 
 class DioHttpService extends HttpService {
+
   final Dio _dio;
   Map<String, dynamic> _headers = {};
 
   DioHttpService(this._dio) {
     _headers = _defaultConfigHeader();
+
+    final interceptors = InterceptorsWrapper(
+      onRequest: (options, handler) async{
+        await MyHttpInterceptor().onRequest(options);
+        handler.next(options);
+      },
+      onResponse: (response, handler) async{
+        await MyHttpInterceptor().onResponse(response);
+        handler.next(response);
+      },
+      onError: (error, handler) async{
+        await MyHttpInterceptor().onError(error);
+        handler.next(error);
+      }
+    );
+
+    _dio.interceptors.add(interceptors);
   }
 
   Dio get dio => _dio;

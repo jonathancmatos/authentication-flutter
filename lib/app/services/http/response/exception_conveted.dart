@@ -1,5 +1,4 @@
 import 'package:authentication_flutter/app/core/error/exception.dart';
-import 'dart:convert';
 import 'package:dio/dio.dart';
 
 const _codeError = 00;

@@ -1,13 +1,12 @@
-import 'package:dio/dio.dart';
 
 const String baseUrl = "http://192.168.0.10/api-tokenization/api";
 
 abstract class HttpService {
-  Future<Response<T>> get<T>(String? url);
-  Future<Response<T>> post<T>(String? url, {dynamic data});
-  Future<Response<T>> put<T>(String? url, {dynamic data});
-  Future<Response<T>> patch<T>(String? url, {dynamic data});
-  Future<Response<T>> delete<T>(String? url, {dynamic data});
+  Future<dynamic> get<T>(String? url);
+  Future<dynamic> post<T>(String? url, {dynamic data});
+  Future<dynamic> put<T>(String? url, {dynamic data});
+  Future<dynamic> patch<T>(String? url, {dynamic data});
+  Future<dynamic> delete<T>(String? url, {dynamic data});
 }
 
 abstract class MyInterceptor<TRequest, TResponse, TError> {

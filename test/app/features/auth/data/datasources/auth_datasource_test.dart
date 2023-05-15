@@ -70,7 +70,7 @@ void main() {
 
     test('should return map with tokens on success', () async {
       //arrange
-      final response = fixture("authetication/login_success.json");
+      final response = json.decode(fixture("authetication/login_success.json"));
       when(mockHttpService.post(any, data: anyNamed('data')))
           .thenAnswer((_) async => Response(
                 data: response,
@@ -81,7 +81,7 @@ void main() {
       final result = await authDataSource.signIn(model);
       //assert
       expect(result, equals(isA<Map>()));
-      expect(result?["access_token"], json.decode(response)["access_token"]);
+      expect(result?["access_token"], response["access_token"]);
     });
 
     test('should return internal fault when status code equals 400', () async {

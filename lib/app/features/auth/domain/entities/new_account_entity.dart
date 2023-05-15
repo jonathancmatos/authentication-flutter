@@ -1,18 +1,15 @@
-import 'package:equatable/equatable.dart';
+import 'package:authentication_flutter/app/features/auth/domain/entities/user_entity.dart';
 
-class NewAccountEntity extends Equatable {
-  final String name;
-  final String email;
+
+class NewAccountEntity extends UserEntity {
+
   final String passwd;
-  final String phone;
 
   const NewAccountEntity({
-    required this.name, 
+    required String name, 
+    required String email, 
+    required String phone,
     required this.passwd,
-    required this.email, 
-    required this.phone,
-  });
+  }) : super(name: name, email: email, phone: phone);
 
-  @override
-  List<Object?> get props => [name, email, passwd, phone];
 }

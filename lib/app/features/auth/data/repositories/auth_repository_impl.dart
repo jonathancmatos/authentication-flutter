@@ -19,7 +19,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, bool>>? signUp(NewAccountEntity account) async {
     final isConnected = await _checkNetworkConnected();
-    return isConnected.fold(
+    return await isConnected.fold(
       (failure) => Left(NoConnectionFailure()),
       (success) async {
         try {
@@ -43,17 +43,10 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
 
-  Future<Either<Failure, bool>> _checkNetworkConnected() async {
-    if (!await networkInfo.isConnected) {
-      return Left(NoConnectionFailure());
-    }
-    return const Right(true);
-  }
-
   @override
   Future<Either<Failure, bool>>? signIn(SignInEntity signIn) async {
     final isConnected = await _checkNetworkConnected();
-    return isConnected.fold(
+    return await isConnected.fold(
       (failure) => Left(NoConnectionFailure()),
       (success) async {
         try {
@@ -76,4 +69,13 @@ class AuthRepositoryImpl implements AuthRepository {
       },
     );
   }
+
+
+  Future<Either<Failure, bool>> _checkNetworkConnected() async {
+    if (!await networkInfo.isConnected) {
+      return Left(NoConnectionFailure());
+    }
+    return const Right(true);
+  }
+
 }
