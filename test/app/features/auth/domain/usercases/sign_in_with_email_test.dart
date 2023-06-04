@@ -3,7 +3,6 @@ import 'package:authentication_flutter/app/features/auth/domain/usercases/sign_i
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mockito/mockito.dart';
-
 import '../../mocks/auth_mock.mocks.dart';
 
 void main() {

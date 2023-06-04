@@ -1,6 +1,8 @@
 import 'package:authentication_flutter/app/services/storage/storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+const String keyProfile = "user_profile";
+
 class PreferencesService implements StorageService {
   final SharedPreferences _preferences;
   PreferencesService(this._preferences);

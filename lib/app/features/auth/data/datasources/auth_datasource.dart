@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
+import 'package:authentication_flutter/app/features/auth/data/models/user.model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart';
 import 'package:authentication_flutter/app/services/http/http_service.dart';
 import 'package:authentication_flutter/app/services/http/response/exception_conveted.dart';
@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 abstract class AuthDataSource {
   Future<bool>? signUp(AccountModel model);
   Future<Map<String, dynamic>>? signIn(SignInModel model);
+  Future<UserModel>? currentUser();
 }
 
 class AuthDataSourceImpl extends AuthDataSource {
@@ -55,5 +56,11 @@ class AuthDataSourceImpl extends AuthDataSource {
     } on Exception {
       throw InternalException();
     }
+  }
+  
+  @override
+  Future<UserModel>? currentUser() {
+    // TODO: implement currentUser
+    throw UnimplementedError();
   }
 }
