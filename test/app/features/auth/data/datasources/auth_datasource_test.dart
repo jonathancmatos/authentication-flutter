@@ -3,6 +3,7 @@ import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/features/auth/data/datasources/auth_datasource.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart';
+import 'package:authentication_flutter/app/features/auth/data/models/user.model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -103,4 +104,42 @@ void main() {
       expect(() async => await call(model), throwsA(isA<ServerException>()));
     });
   });
+
+  group('currentUser', () {
+    test('should return user data on success', () async{
+      //arrange
+      final response = await json.decode(fixture("authetication/current_user_success.json"));
+      when(mockHttpService.get(any))
+        .thenAnswer((_) async => Response(
+          data: response,
+          statusCode: 200,
+          requestOptions: RequestOptions()
+      ));
+      //act
+      final result = await authDataSource.currentUser();
+      //assert
+      expect(result, equals(isA<UserModel>()));
+      expect(result?.name, equals(response["name"]));
+    });
+
+    test('should return a 400 error when there is a problem in the api', () async{
+      //arrange
+      final response = await json.decode(fixture("authetication/login_error.json"));
+      when(mockHttpService.get(any)).thenThrow(
+        DioError(
+          requestOptions: RequestOptions(),
+          response: Response(
+            data: response,
+            statusCode: 400,
+            requestOptions: RequestOptions()
+          )
+        ),
+      );
+      //act
+      final call = authDataSource.currentUser;
+      //assert
+      expect(() async => await call(), throwsA(isA<ServerException>()));
+    });
+  });
+
 }

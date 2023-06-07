@@ -7,6 +7,8 @@ import 'dart:async' as _i3;
 
 import 'package:authentication_flutter/app/core/manager/session_manager.dart'
     as _i2;
+import 'package:authentication_flutter/app/services/storage/preferences_service.dart'
+    as _i4;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -55,4 +57,55 @@ class MockSessionManager extends _i1.Mock implements _i2.SessionManager {
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+}
+
+/// A class which mocks [PreferencesService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockPreferencesService extends _i1.Mock
+    implements _i4.PreferencesService {
+  MockPreferencesService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<bool> containsKey({required String? key}) => (super.noSuchMethod(
+        Invocation.method(
+          #containsKey,
+          [],
+          {#key: key},
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+  @override
+  String? read({required String? key}) => (super.noSuchMethod(Invocation.method(
+        #read,
+        [],
+        {#key: key},
+      )) as String?);
+  @override
+  _i3.Future<bool> remove({required String? key}) => (super.noSuchMethod(
+        Invocation.method(
+          #remove,
+          [],
+          {#key: key},
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+  @override
+  _i3.Future<bool> save({
+    required String? key,
+    required String? value,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #save,
+          [],
+          {
+            #key: key,
+            #value: value,
+          },
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
 }

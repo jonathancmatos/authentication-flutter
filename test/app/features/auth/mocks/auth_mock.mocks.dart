@@ -6,8 +6,6 @@
 import 'dart:async' as _i4;
 
 import 'package:authentication_flutter/app/core/error/failure.dart' as _i7;
-import 'package:authentication_flutter/app/core/manager/session_manager.dart'
-    as _i14;
 import 'package:authentication_flutter/app/core/network/network_info.dart'
     as _i13;
 import 'package:authentication_flutter/app/features/auth/data/datasources/auth_datasource.dart'
@@ -273,41 +271,4 @@ class MockNetworkInfo extends _i1.Mock implements _i13.NetworkInfo {
         Invocation.getter(#isConnected),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
-}
-
-/// A class which mocks [SessionManager].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockSessionManager extends _i1.Mock implements _i14.SessionManager {
-  MockSessionManager() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  _i4.Future<void> setAccessToken(String? value) => (super.noSuchMethod(
-        Invocation.method(
-          #setAccessToken,
-          [value],
-        ),
-        returnValue: _i4.Future<void>.value(),
-        returnValueForMissingStub: _i4.Future<void>.value(),
-      ) as _i4.Future<void>);
-  @override
-  _i4.Future<void> setRefreshToken(String? value) => (super.noSuchMethod(
-        Invocation.method(
-          #setRefreshToken,
-          [value],
-        ),
-        returnValue: _i4.Future<void>.value(),
-        returnValueForMissingStub: _i4.Future<void>.value(),
-      ) as _i4.Future<void>);
-  @override
-  _i4.Future<void> logout() => (super.noSuchMethod(
-        Invocation.method(
-          #logout,
-          [],
-        ),
-        returnValue: _i4.Future<void>.value(),
-        returnValueForMissingStub: _i4.Future<void>.value(),
-      ) as _i4.Future<void>);
 }

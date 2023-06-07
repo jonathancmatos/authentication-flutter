@@ -59,8 +59,22 @@ class AuthDataSourceImpl extends AuthDataSource {
   }
   
   @override
-  Future<UserModel>? currentUser() {
-    // TODO: implement currentUser
-    throw UnimplementedError();
+  Future<UserModel>? currentUser() async{
+    try{
+
+      final response = await httpService.get("$baseUrl/current-user");
+      if(response.statusCode == 200){
+        return UserModel.fromJson(response.data);
+      }
+
+      return throw InternalException();
+
+    } on DioError catch (e) {
+      throw serverExceptionConverted(e.response);
+    } on SocketException {
+      throw NoConnectionException();
+    } on Exception {
+      throw InternalException();
+    }
   }
 }

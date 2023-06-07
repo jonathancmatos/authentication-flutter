@@ -1,6 +1,8 @@
+import 'package:authentication_flutter/app/core/manager/session_manager.dart';
 import 'package:authentication_flutter/app/services/http/http_service.dart';
 import 'package:authentication_flutter/app/services/http/interceptors/my_http_interceptor.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class DioHttpService extends HttpService {
 
@@ -37,8 +39,7 @@ class DioHttpService extends HttpService {
 
   @override
   Future<Response<T>> get<T>(String? url) async {
-    final options = _getOptionsParams();
-    return await _dio.get(url ?? "", options: options);
+    return await _dio.get(url ?? "", options: _getOptionsParams());
   }
 
   @override
@@ -57,6 +58,13 @@ class DioHttpService extends HttpService {
   }
 
   Options _getOptionsParams() {
+
+    final session = Modular.get<SessionManager>();
+    if(session.getAccessToken() != null && session.getAccessToken()!.isNotEmpty){
+      String token = session.getAccessToken() ?? "";
+      _headers["Authorization"] = "Bearer $token";
+    }  
+
     return Options(
       headers: _headers,
       contentType: Headers.jsonContentType,
