@@ -1,9 +1,11 @@
 import 'package:authentication_flutter/app/core/domain/entities/message.dart';
 import 'package:authentication_flutter/app/features/auth/domain/entities/new_account_entity.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/new_account.dart';
+import 'package:authentication_flutter/app/utils/alert_message.dart';
 import 'package:authentication_flutter/app/utils/utils.dart';
 import 'package:authentication_flutter/app/utils/validators.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 part 'signup_store.g.dart';
 
@@ -91,12 +93,13 @@ abstract class _SignUpStoreBase with Store {
     }
   }
 
-  void _onSuccess() {
+  void _onSuccess(){
     formKey.currentState?.reset();
-    print(true);
+    AlertMessage(message: "Cadastro realizado com sucesso !", type: TypeMessage.success).show();
+    Modular.to.pop();
   }
 
   void _onFailure(Message failure) {
-    print(failure.text);
+    AlertMessage(message: failure.text, type: TypeMessage.error).show();
   }
 }

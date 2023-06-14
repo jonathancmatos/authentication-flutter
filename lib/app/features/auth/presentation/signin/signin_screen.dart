@@ -1,3 +1,4 @@
+import 'package:authentication_flutter/app/features/auth/presentation/signin/components/button_new_account.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/signin/states/signin_store.dart';
 import 'package:authentication_flutter/app/shared/components/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,10 @@ class SignInScreen extends StatelessWidget {
                       text: "ENTRAR",
                       onPressed: store.signIn,
                       loading: store.isLoading,
-                    )
+                    ),
+                    const SizedBox(height: 40),
+                    //Button New Account
+                    const ButtonNewAccount()
                   ],
                 ),
               ),

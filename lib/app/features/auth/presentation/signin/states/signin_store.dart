@@ -1,9 +1,12 @@
 import 'package:authentication_flutter/app/core/domain/entities/message.dart';
+import 'package:authentication_flutter/app/core/manager/user_manager_store.dart';
 import 'package:authentication_flutter/app/features/auth/domain/entities/sign_in_entity.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/sign_in_with_email.dart';
+import 'package:authentication_flutter/app/utils/alert_message.dart';
 import 'package:authentication_flutter/app/utils/utils.dart';
 import 'package:authentication_flutter/app/utils/validators.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 part 'signin_store.g.dart';
 
@@ -27,8 +30,7 @@ abstract class _SignInStore with Store {
   @action
   void setEmail(String value) => email = value;
   @computed
-  String? get emailValidator =>
-      !validateEmail(email) ? messageEmailNotValid : null;
+  String? get emailValidator => !validateEmail(email) ? messageEmailNotValid : null;
 
   @observable
   String passwd = "";
@@ -55,12 +57,15 @@ abstract class _SignInStore with Store {
     }
   }
 
-  void _onSuccess() {
+  void _onSuccess() async{
     formKey.currentState?.reset();
-    print(true);
+    final store = Modular.get<UserManagerStore>();
+    await store.getCurrentUser().then((_){
+      if(store.isLogged) Modular.to.navigate("/me");
+    });
   }
 
   void _onFailure(Message failure) {
-    print(failure.text);
+    AlertMessage(message: failure.text, type: TypeMessage.error).show();
   }
 }

@@ -3,6 +3,7 @@ import 'package:authentication_flutter/app/shared/components/custom_button.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -14,6 +15,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
 
   final store = Modular.get<SignUpStore>();
+  final maskPhoneFormatter = MaskTextInputFormatter(mask: "(##) #####-####");
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +90,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: (v) => store.phoneValidator,
                     onChanged: store.setPhone,
+                    inputFormatters: [maskPhoneFormatter],
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                         border: OutlineInputBorder(), labelText: "Telefone:"),
