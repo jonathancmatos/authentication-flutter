@@ -3,6 +3,7 @@ import 'package:authentication_flutter/app/core/manager/user_manager_store.dart'
 import 'package:authentication_flutter/app/core/network/network_info.dart';
 import 'package:authentication_flutter/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/get_current_user.dart';
+import 'package:authentication_flutter/app/features/auth/domain/usercases/logout.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/new_account.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/sign_in_with_email.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/signin/signin_screen.dart';
@@ -48,8 +49,9 @@ class AppModule extends Module {
     Bind.factory((i) => GetCurrentUserImpl(i())),
     Bind.factory((i) => NewAccountImpl(i())),
     Bind.factory((i) => SignInWithEmailImpl(i())),
+    Bind.factory((i) => LogoutImpl(i())),
     // Auth -> Store
-    Bind.singleton((i) => UserManagerStore(i())),
+    Bind.singleton((i) => UserManagerStore(i<GetCurrentUserImpl>(),i<LogoutImpl>())),
     Bind.factory((i) => SignUpStore(i())),
     Bind.factory((i) => SignInStore(i())),
   ];

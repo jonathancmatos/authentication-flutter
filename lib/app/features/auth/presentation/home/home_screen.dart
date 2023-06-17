@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    when((_) => !store.isLogged, () => store.logout());
+    when((_) => !store.isLogged, () => store.logoff());
   }
 
   @override
@@ -29,12 +29,18 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Center(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text("Olá ${store.user?.name}", style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 10),
-              Text(store.user?.email ?? '')
+              Text(store.user?.email ?? ''),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => store.logoff(), 
+                child: Text("Sair da Conta".toUpperCase())
+              )
             ],
           ),
         ),

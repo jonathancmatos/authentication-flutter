@@ -14,7 +14,6 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:fpdart/fpdart.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-
   final NetworkInfo networkInfo;
   AuthDataSource dataSource;
   AuthRepositoryImpl({required this.networkInfo, required this.dataSource});
@@ -74,60 +73,62 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>>? currentUser() async{
+  Future<Either<Failure, UserEntity>>? currentUser() async {
     final isConnected = await _checkNetworkConnected();
-    return await isConnected.fold(
-      (failure) => Left(NoConnectionFailure()), 
-      (success) async{
-        try{
-          final response = await dataSource.currentUser();
+    return await isConnected.fold((failure) => Left(NoConnectionFailure()),
+        (success) async {
+      try {
+        final response = await dataSource.currentUser();
 
-          //Save data profile to SharedPrefernces
-          final storage = Modular.get<PreferencesService>();
-          await storage.save(key: keyProfile, value: response?.toJson().toString() ?? "");
+        //Save data profile to SharedPrefernces
+        final storage = Modular.get<PreferencesService>();
+        await storage.save(
+            key: keyProfile, value: response?.toJson().toString() ?? "");
 
-          return Right(UserEntity(
-            name: response?.name ?? "",
-            email: response?.email ?? "",
-            phone: response?.phone ?? "",
-          ));
-        } on InternalException {
-          return Left(InternalFailure());
-        } on ServerException catch (e) {
-          return Left(ServerFailure(type: e.type, message: e.message));
-        } on NoConnectionException {
-          return Left(NoConnectionFailure());
-        }
+        return Right(UserEntity(
+          name: response?.name ?? "",
+          email: response?.email ?? "",
+          phone: response?.phone ?? "",
+        ));
+      } on InternalException {
+        return Left(InternalFailure());
+      } on ServerException catch (e) {
+        return Left(ServerFailure(type: e.type, message: e.message));
+      } on NoConnectionException {
+        return Left(NoConnectionFailure());
       }
-    );
+    });
   }
 
   @override
-  Future<Either<Failure, bool>>? logout() async{
+  Future<Either<Failure, bool>>? logout() async {
     final isConnected = await _checkNetworkConnected();
-    return await isConnected.fold(
-      (failure) => Left(NoConnectionFailure()), 
-      (success) async{
-        try{
+    return await isConnected.fold((failure) => Left(NoConnectionFailure()),
+        (success) async {
+      try {
+        final response = await dataSource.logout();
+        await _clearSessionsAndStorages();
 
-          //Clear profile data
-          final storage = Modular.get<PreferencesService>();
-          await storage.remove(key: keyProfile);
-          //Clear Sessions
-          final session = Modular.get<SessionManager>();
-          await session.clear();
-
-          final response = await dataSource.logout();
-          return Right(response ?? false);
-        } on InternalException{
-          return Left(InternalFailure());
-        } on ServerException catch(e){
-          return Left(ServerFailure(type: e.type, message: e.message));
-        } on NoConnectionException{
-          return Left(NoConnectionFailure());
-        }
+        return Right(response ?? false);
+      } on InternalException {
+        await _clearSessionsAndStorages();  
+        return Left(InternalFailure());
+      } on ServerException catch (e) {
+        await _clearSessionsAndStorages();  
+        return Left(ServerFailure(type: e.type, message: e.message));
+      } on NoConnectionException {
+        return Left(NoConnectionFailure());
       }
-    );  
+    });
+  }
+
+  Future<void> _clearSessionsAndStorages() async {
+    //Clear profile data
+    final storage = Modular.get<PreferencesService>();
+    await storage.remove(key: keyProfile);
+    //Clear Sessions
+    final session = Modular.get<SessionManager>();
+    await session.clear();
   }
 
   Future<Either<Failure, bool>> _checkNetworkConnected() async {
@@ -136,5 +137,4 @@ class AuthRepositoryImpl implements AuthRepository {
     }
     return const Right(true);
   }
-  
 }

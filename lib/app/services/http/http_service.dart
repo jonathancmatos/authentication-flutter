@@ -1,5 +1,5 @@
 
-const String baseUrl = "http://192.168.0.9/api-tokenization/api";
+const String baseUrl = "http://192.168.0.7/api-tokenization/api";
 
 abstract class HttpService {
   Future<dynamic> get<T>(String? url);
