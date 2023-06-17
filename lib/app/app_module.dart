@@ -45,7 +45,7 @@ class AppModule extends Module {
       dataSource: i()
     )),
     // Auth -> Usercases
-    Bind.factory((i) => getCurrentUserImpl(i())),
+    Bind.factory((i) => GetCurrentUserImpl(i())),
     Bind.factory((i) => NewAccountImpl(i())),
     Bind.factory((i) => SignInWithEmailImpl(i())),
     // Auth -> Store

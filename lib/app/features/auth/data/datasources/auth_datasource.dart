@@ -11,6 +11,7 @@ abstract class AuthDataSource {
   Future<bool>? signUp(AccountModel model);
   Future<Map<String, dynamic>>? signIn(SignInModel model);
   Future<UserModel>? currentUser();
+  Future<bool>? logout();
 }
 
 class AuthDataSourceImpl extends AuthDataSource {
@@ -74,6 +75,22 @@ class AuthDataSourceImpl extends AuthDataSource {
     } on SocketException {
       throw NoConnectionException();
     } on Exception {
+      throw InternalException();
+    }
+  }
+  
+  @override
+  Future<bool>? logout() async{
+    try{
+      
+      final response = await httpService.post("$baseUrl/logout");
+      return response.statusCode == 200;
+
+    }on DioError catch(e){
+      throw serverExceptionConverted(e.response);
+    }on SocketException{
+      throw NoConnectionException();
+    } on Exception{
       throw InternalException();
     }
   }

@@ -7,7 +7,7 @@ abstract class NewAccount {
   Future<Either<Failure, bool?>?> call(NewAccountEntity account);
 }
 
-class NewAccountImpl extends NewAccount {
+class NewAccountImpl implements NewAccount {
   final AuthRepository repository;
   NewAccountImpl(this.repository);
 

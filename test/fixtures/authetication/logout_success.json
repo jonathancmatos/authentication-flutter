@@ -1,0 +1,6 @@
+{
+    "response": {
+        "type": "logout_sucess",
+        "message":true
+    }
+}

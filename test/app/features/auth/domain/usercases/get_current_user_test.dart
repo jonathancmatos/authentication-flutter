@@ -15,7 +15,7 @@ void main() {
 
   setUp((){
     repository = MockAuthRepository();
-    usercase = getCurrentUserImpl(repository);
+    usercase = GetCurrentUserImpl(repository);
   });
 
   test("should return the data of the logged in user", () async{

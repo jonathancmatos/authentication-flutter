@@ -26,7 +26,7 @@ class SessionManager {
   }
 
 
-  Future<void> logout() async {
+  Future<void> clear() async {
     await _storageService.remove(key: _keyAccessToken);
     await _storageService.remove(key: _keyRefreshToken);
   }

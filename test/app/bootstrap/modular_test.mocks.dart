@@ -49,9 +49,9 @@ class MockSessionManager extends _i1.Mock implements _i2.SessionManager {
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
   @override
-  _i3.Future<void> logout() => (super.noSuchMethod(
+  _i3.Future<void> clear() => (super.noSuchMethod(
         Invocation.method(
-          #logout,
+          #clear,
           [],
         ),
         returnValue: _i3.Future<void>.value(),

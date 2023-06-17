@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/core/error/failure.dart';
 import 'package:authentication_flutter/app/core/manager/session_manager.dart';
@@ -253,4 +254,78 @@ void main() {
     });
 
   });
+
+  group('logout', () {
+    test("should check if the device is online", (){
+      verifyInfoNetwork(true, () async{
+        //arrange
+        when(dataSource.logout()).thenAnswer((_) async => true);
+        when(preferencesService.remove(key: "user_profile")).thenAnswer((_) async => true);
+        when(sessionManager.clear()).thenAnswer((_) => Future<void>.value());
+        //act
+        await repository.logout();
+        //assert
+        verify(networkInfo.isConnected);
+      });
+    });
+
+    test("should return NoConectedException if the device is offline", (){
+      verifyInfoNetwork(false, () async{
+        //arrange
+        when(dataSource.logout()).thenAnswer((_) async => true);
+        when(preferencesService.remove(key: "user_profile")).thenAnswer((_) async => true);
+        //act
+        final result = await repository.logout();
+        //assert
+        expect(result, equals(Left(NoConnectionFailure())));
+        verify(networkInfo.isConnected);
+      });
+    });
+
+    test("should return true when performing logout", (){
+      verifyInfoNetwork(true, () async{
+        //arrange
+        when(preferencesService.remove(key: "user_profile")).thenAnswer((_) async => true);
+        when(sessionManager.clear()).thenAnswer((_) => Future<void>.value());
+
+        final response = await json.decode(fixture("authetication/logout_success.json"))["response"];
+        when(dataSource.logout()).thenAnswer((_) async => response["message"]);
+        //act
+        final result = await repository.logout();
+        //assert
+        expect(result?.isRight(), equals(true));
+        verify(preferencesService.remove(key: "user_profile"));
+        verify(sessionManager.clear());
+        verify(dataSource.logout());
+        verifyNoMoreInteractions(dataSource);
+      });
+    });
+
+    test("should return a failure when trying to logout", (){
+      verifyInfoNetwork(true, () async{
+        //arrange
+        final response = await json.decode(fixture("authetication/logout_error.json"))["response"];
+        when(preferencesService.remove(key: "user_profile")).thenAnswer((_) async => true);
+        when(dataSource.logout()).thenThrow(
+          ServerException(
+            code: 401, 
+            type: response["type"], 
+            message: response["message"],
+        ));
+        //act
+        final result = await repository.logout();
+        //assert
+        expect(result, equals(left(
+          const ServerFailure(
+            type: "unauthorized", 
+            message: "Expired token"
+        ))));
+        verify(preferencesService.remove(key: "user_profile"));
+        verify(sessionManager.clear());
+        verify(dataSource.logout());
+        verifyNoMoreInteractions(dataSource);
+      });
+    });
+  });
+
 }

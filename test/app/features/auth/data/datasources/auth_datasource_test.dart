@@ -142,4 +142,39 @@ void main() {
     });
   });
 
+  group("logout", (){
+    test('should return 200 on success', () async{
+      //arrange
+      final response = await json.decode(fixture("authetication/logout_success.json"));
+      when(mockHttpService.post(any)).thenAnswer((_) async => Response(
+        statusCode: 200,
+        data: response,
+        requestOptions: RequestOptions()
+      ));
+      //act
+      final result = await authDataSource.logout();
+      //assert
+      expect(result, equals(true));
+    });
+
+    test('should return a 400 error [Server Exception]', () async{
+      //arrange
+      final response = await json.decode(fixture("authetication/logout_error.json"));
+      when(mockHttpService.post(any)).thenThrow(
+        DioError(
+          response: Response(
+            data: response,
+            statusCode: 400,
+            requestOptions: RequestOptions()
+          ),
+          requestOptions: RequestOptions()
+      ));
+
+      //act
+      final call = authDataSource.logout;
+      //assert
+      expect(() async => await call(), throwsA(isA<ServerException>()));
+    });
+  });
+
 }

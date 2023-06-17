@@ -102,11 +102,39 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
 
+  @override
+  Future<Either<Failure, bool>>? logout() async{
+    final isConnected = await _checkNetworkConnected();
+    return await isConnected.fold(
+      (failure) => Left(NoConnectionFailure()), 
+      (success) async{
+        try{
+
+          //Clear profile data
+          final storage = Modular.get<PreferencesService>();
+          await storage.remove(key: keyProfile);
+          //Clear Sessions
+          final session = Modular.get<SessionManager>();
+          await session.clear();
+
+          final response = await dataSource.logout();
+          return Right(response ?? false);
+        } on InternalException{
+          return Left(InternalFailure());
+        } on ServerException catch(e){
+          return Left(ServerFailure(type: e.type, message: e.message));
+        } on NoConnectionException{
+          return Left(NoConnectionFailure());
+        }
+      }
+    );  
+  }
+
   Future<Either<Failure, bool>> _checkNetworkConnected() async {
     if (!await networkInfo.isConnected) {
       return Left(NoConnectionFailure());
     }
     return const Right(true);
   }
-
+  
 }

@@ -7,10 +7,10 @@ abstract class GetCurrentUser{
   Future<Either<Failure, UserEntity?>?> call();
 }
 
-class getCurrentUserImpl extends GetCurrentUser{
+class GetCurrentUserImpl implements GetCurrentUser{
 
   final AuthRepository authRepository;
-  getCurrentUserImpl(this.authRepository);
+  GetCurrentUserImpl(this.authRepository);
 
   @override
   Future<Either<Failure, UserEntity>?> call() async{
