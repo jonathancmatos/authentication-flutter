@@ -1,0 +1,6 @@
+{
+    "response": {
+        "type": "unauthorized",
+        "message": "Signature verification failed"
+    }
+}

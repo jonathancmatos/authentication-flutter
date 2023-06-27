@@ -12,6 +12,7 @@ abstract class AuthDataSource {
   Future<Map<String, dynamic>>? signIn(SignInModel model);
   Future<UserModel>? currentUser();
   Future<bool>? logout();
+  Future<Map<String, dynamic>>? refreshAccessToken(String refreshToken);
 }
 
 class AuthDataSourceImpl extends AuthDataSource {
@@ -91,6 +92,30 @@ class AuthDataSourceImpl extends AuthDataSource {
     }on SocketException{
       throw NoConnectionException();
     } on Exception{
+      throw InternalException();
+    }
+  }
+  
+  @override
+  Future<Map<String, dynamic>>? refreshAccessToken(String refreshToken) async{
+    try{
+
+      final response = await httpService.post(
+        "$baseUrl/refresh-token",
+        data: FormData.fromMap({"refresh_token":refreshToken}),
+      );
+
+      if(response.statusCode == 200){
+        return response.data;
+      }
+
+      return {};
+
+    }on DioError catch(e){
+      throw serverExceptionConverted(e.response);
+    }on SocketException{
+      throw NoConnectionException();
+    }on Exception{
       throw InternalException();
     }
   }

@@ -75,50 +75,78 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>>? currentUser() async {
     final isConnected = await _checkNetworkConnected();
-    return await isConnected.fold((failure) => Left(NoConnectionFailure()),
-        (success) async {
-      try {
-        final response = await dataSource.currentUser();
+    return await isConnected.fold(
+      (failure) => Left(NoConnectionFailure()),
+      (success) async {
+        try {
+          final response = await dataSource.currentUser();
 
-        //Save data profile to SharedPrefernces
-        final storage = Modular.get<PreferencesService>();
-        await storage.save(
-            key: keyProfile, value: response?.toJson().toString() ?? "");
+          //Save data profile to SharedPrefernces
+          final storage = Modular.get<PreferencesService>();
+          await storage.save(
+              key: keyProfile, value: response?.toJson().toString() ?? "");
 
-        return Right(UserEntity(
-          name: response?.name ?? "",
-          email: response?.email ?? "",
-          phone: response?.phone ?? "",
-        ));
-      } on InternalException {
-        return Left(InternalFailure());
-      } on ServerException catch (e) {
-        return Left(ServerFailure(type: e.type, message: e.message));
-      } on NoConnectionException {
-        return Left(NoConnectionFailure());
-      }
+          return Right(UserEntity(
+            name: response?.name ?? "",
+            email: response?.email ?? "",
+            phone: response?.phone ?? "",
+          ));
+        } on InternalException {
+          return Left(InternalFailure());
+        } on ServerException catch (e) {
+          return Left(ServerFailure(type: e.type, message: e.message));
+        } on NoConnectionException {
+          return Left(NoConnectionFailure());
+        }
     });
   }
 
   @override
   Future<Either<Failure, bool>>? logout() async {
     final isConnected = await _checkNetworkConnected();
-    return await isConnected.fold((failure) => Left(NoConnectionFailure()),
-        (success) async {
-      try {
-        final response = await dataSource.logout();
-        await _clearSessionsAndStorages();
+    return await isConnected.fold(
+      (failure) => Left(NoConnectionFailure()),
+      (success) async {
+        try {
+          final response = await dataSource.logout();
+          await _clearSessionsAndStorages();
 
-        return Right(response ?? false);
-      } on InternalException {
-        await _clearSessionsAndStorages();  
-        return Left(InternalFailure());
-      } on ServerException catch (e) {
-        await _clearSessionsAndStorages();  
-        return Left(ServerFailure(type: e.type, message: e.message));
-      } on NoConnectionException {
-        return Left(NoConnectionFailure());
-      }
+          return Right(response ?? false);
+        } on InternalException {
+          await _clearSessionsAndStorages();  
+          return Left(InternalFailure());
+        } on ServerException catch (e) {
+          await _clearSessionsAndStorages();  
+          return Left(ServerFailure(type: e.type, message: e.message));
+        } on NoConnectionException {
+          return Left(NoConnectionFailure());
+        }
+    });
+  }
+
+  @override
+  Future<Either<Failure, bool>>? refreshAccessToken() async{
+    final isConnected = await _checkNetworkConnected();
+    return await isConnected.fold(
+      (failure) => Left(NoConnectionFailure()),
+      (success) async {
+        try {
+          final session = Modular.get<SessionManager>();
+          String refreshToken = session.getRefreshToken().toString();
+
+          final response = await dataSource.refreshAccessToken(refreshToken);
+          if (response != null && response["access_token"].toString().isNotEmpty) {
+            await session.setAccessToken(response["access_token"].toString());
+          }
+
+          return const Right(true);
+        } on InternalException {
+          return Left(InternalFailure());
+        } on ServerException catch (e) {
+          return Left(ServerFailure(type: e.type, message: e.message));
+        } on NoConnectionException {
+          return Left(NoConnectionFailure());
+        }
     });
   }
 
@@ -137,4 +165,5 @@ class AuthRepositoryImpl implements AuthRepository {
     }
     return const Right(true);
   }
+
 }

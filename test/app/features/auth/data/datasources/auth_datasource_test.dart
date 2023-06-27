@@ -177,4 +177,41 @@ void main() {
     });
   });
 
+
+  group('refreshToken',(){
+    String refreshToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2ODc4MzM3MjAsIm5iZiI6MTY4NzgzMzcyMCwiaXNzIjoibG9jYWxob3N0IiwidXNlcm5hbWUiOiJ0b2tlbml6YXRpb24iLCJleHAiOjE2ODc5MjAxMjAsImVtYWlsIjoiam9uYXRoYW5jb3N0YTQyOEBnbWFpbC5jb20ifQ.siwyueqXtifqGt38--d3GX9RPT5r_jzASOG8U0y1ZiFX--b8bpfjD443_cLaymz5SPS-mTO6jd_L82rExCRMEQ";
+    
+    test('should return 200 on success', () async{
+      //arrange
+      final response = await json.decode(fixture("authetication/refresh_token_success.json"));
+      when(mockHttpService.post(any, data:anyNamed("data"))).thenAnswer((_) async => Response(
+        statusCode: 200,
+        data: response,
+        requestOptions: RequestOptions()
+      ));
+      //act
+      final result = await authDataSource.refreshAccessToken(refreshToken);
+      //assert
+      expect(result, isA<Map>());
+      expect(result?["response"]["message"], equals(response["response"]["message"]));
+    });
+
+    test('should return 401 failure on refresh token', () async{
+      //arrange
+      final response = await json.decode(fixture("authetication/refresh_token_error.json"));
+      when(mockHttpService.post(any, data: anyNamed("data"))).thenThrow(
+        DioError(
+          response: Response(
+            data: response,
+            statusCode: 401,
+            requestOptions: RequestOptions()
+          ),
+          requestOptions: RequestOptions()
+      ));
+      //act
+      final call = authDataSource.refreshAccessToken;
+      //assert
+      expect(() async => await call(refreshToken), throwsA(isA<ServerException>()));
+    });
+  });
 }

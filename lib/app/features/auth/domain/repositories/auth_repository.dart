@@ -5,6 +5,7 @@ import 'package:authentication_flutter/app/features/auth/domain/entities/user_en
 import 'package:fpdart/fpdart.dart';
 
 abstract class AuthRepository {
+  Future<Either<Failure, bool>>? refreshAccessToken();
   Future<Either<Failure, bool>>? signUp(NewAccountEntity account);
   Future<Either<Failure, bool>>? signIn(SignInEntity signIn);
   Future<Either<Failure, UserEntity>>? currentUser();

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/core/error/failure.dart';
 import 'package:authentication_flutter/app/core/manager/session_manager.dart';
@@ -323,6 +322,74 @@ void main() {
         verify(preferencesService.remove(key: "user_profile"));
         verify(sessionManager.clear());
         verify(dataSource.logout());
+        verifyNoMoreInteractions(dataSource);
+      });
+    });
+  });
+
+  group('refreshToken', () {
+    test('should check if the device in online', (){
+      verifyInfoNetwork(true, () async{
+        //arrange
+        when(sessionManager.getRefreshToken()).thenAnswer((_) => "value");
+        when(dataSource.refreshAccessToken("value")).thenAnswer((_) async => {});
+        when(sessionManager.setAccessToken("value")).thenAnswer((_) async => true);
+        //act
+        await repository.refreshAccessToken();
+        //assert
+        verify(networkInfo.isConnected);
+      });
+    });
+
+    test('should return NoConectedException if the device is offline', (){
+      verifyInfoNetwork(false, () async{
+        //arrange
+        when(dataSource.refreshAccessToken("value")).thenAnswer((_) async => {});
+        //act
+        final result = await repository.refreshAccessToken();
+        //assert
+        expect(result, equals(Left(NoConnectionFailure())));
+        verify(networkInfo.isConnected);
+      });
+    });
+
+    test('should return a new access_token in case of [200] ', (){
+      verifyInfoNetwork(true, () async{
+        //arrange
+        when(sessionManager.getRefreshToken()).thenAnswer((_) => "value");
+        when(dataSource.refreshAccessToken("value")).thenAnswer((_) async => {"access_token":"value"});
+        when(sessionManager.setAccessToken("value")).thenAnswer((_) async => true);
+        //act
+        final result = await repository.refreshAccessToken();
+        //assert
+        expect(result?.isRight(), equals(true));
+        verify(sessionManager.getRefreshToken());
+        verify(dataSource.refreshAccessToken("value"));
+        verify(sessionManager.setAccessToken("value"));
+        verifyNoMoreInteractions(dataSource);
+      });
+    });
+
+    test('should return a failure when refreshing the access_token', (){
+      verifyInfoNetwork(true, () async{
+        //arrange
+        when(sessionManager.getRefreshToken()).thenAnswer((_) => "value");
+        when(dataSource.refreshAccessToken("value")).thenThrow(
+          const ServerException(
+            code: 401, 
+            type: "refresh_token_error", 
+            message: "O token informado não foi encontrado para esse usuário."
+        ));
+        //act
+        final result = await repository.refreshAccessToken();
+        //assert
+        expect(result, equals(const Left(
+           ServerFailure(
+            type: "refresh_token_error", 
+            message: "O token informado não foi encontrado para esse usuário." 
+        ))));
+        verify(sessionManager.getRefreshToken());
+        verify(dataSource.refreshAccessToken("value"));
         verifyNoMoreInteractions(dataSource);
       });
     });

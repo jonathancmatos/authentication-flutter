@@ -1,0 +1,6 @@
+{
+    "response": {
+        "type": "refresh_token_success",
+        "message": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2ODc4MzM3ODIsIm5iZiI6MTY4NzgzMzc4MiwiaXNzIjoibG9jYWxob3N0IiwidXNlcm5hbWUiOiJ0b2tlbml6YXRpb24iLCJleHAiOjE2ODc5MjAxODIsImVtYWlsIjoiam9uYXRoYW5jb3N0YTQyOEBnbWFpbC5jb20ifQ.-hFEfGBEj42BCq3R7CfxS5nBwdyeH83_qDGigstIb5OniDOscgsOPWclW6EnDfhSQcDkgWjpbmZvh-vxZtRQrA"
+    }
+}

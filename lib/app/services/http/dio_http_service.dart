@@ -1,17 +1,12 @@
-import 'package:authentication_flutter/app/core/manager/session_manager.dart';
 import 'package:authentication_flutter/app/services/http/http_service.dart';
 import 'package:authentication_flutter/app/services/http/interceptors/my_http_interceptor.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 
 class DioHttpService extends HttpService {
 
   final Dio _dio;
-  Map<String, dynamic> _headers = {};
 
   DioHttpService(this._dio) {
-    _headers = _defaultConfigHeader();
-
     final interceptors = InterceptorsWrapper(
       onRequest: (options, handler) async{
         await MyHttpInterceptor().onRequest(options);
@@ -59,14 +54,8 @@ class DioHttpService extends HttpService {
 
   Options _getOptionsParams() {
 
-    final session = Modular.get<SessionManager>();
-    if(session.getAccessToken() != null && session.getAccessToken()!.isNotEmpty){
-      String token = session.getAccessToken() ?? "";
-      _headers["Authorization"] = "Bearer $token";
-    }  
-
     return Options(
-      headers: _headers,
+      headers: _defaultConfigHeader(),
       contentType: Headers.jsonContentType,
       responseType: ResponseType.json,
       followRedirects: false,
