@@ -1,7 +1,9 @@
 import 'package:authentication_flutter/app/core/error/failure.dart';
+import 'package:authentication_flutter/app/core/manager/session_manager.dart';
 import 'package:authentication_flutter/app/features/auth/domain/entities/user_entity.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/get_current_user.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/logout.dart';
+import 'package:authentication_flutter/app/services/storage/preferences_service.dart';
 import 'package:authentication_flutter/app/utils/alert_message.dart';
 import 'package:authentication_flutter/app/utils/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -35,6 +37,7 @@ abstract class _UserManagerStoreBase with Store {
     final result = await _getCurrentUser.call();
     result?.fold(
       (failure){
+        _clearSessionsAndStorages();
         if (kDebugMode) {
           print(failureInExeptionConverted(failure).text.toString());
         }
@@ -49,7 +52,12 @@ abstract class _UserManagerStoreBase with Store {
     _loading = false;
   }
 
-  Future<void> logoff() async{
+  Future<void> logoff({bool isExpiredToken = false}) async{
+    if(isExpiredToken) {
+      _clearSessionsAndStorages();
+      return;
+    }
+
     final result = await _logout.call();
     result?.fold((failure){
       final errorObject = failureInExeptionConverted(failure);
@@ -59,7 +67,23 @@ abstract class _UserManagerStoreBase with Store {
         AlertMessage(message: errorObject.text, type: TypeMessage.error).show();
         return;
       }
-      Modular.to.navigate("/login");
-    }, (success) => Modular.to.navigate("/login"));
+      _navigatoToLoginScreen();
+    }, 
+    (success) => _clearSessionsAndStorages());
+  }
+
+  void _navigatoToLoginScreen(){
+    Modular.to.navigate("/login");
+  }
+
+  Future<void> _clearSessionsAndStorages() async {
+    //Clear profile data
+    final storage = Modular.get<PreferencesService>();
+    await storage.remove(key: keyProfile);
+    //Clear Sessions
+    final session = Modular.get<SessionManager>();
+    await session.clear();
+
+    _navigatoToLoginScreen();
   }
 }

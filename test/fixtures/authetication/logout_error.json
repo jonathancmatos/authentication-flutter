@@ -1,6 +1,6 @@
 {
     "response": {
-        "type": "unauthorized",
-        "message": "Expired token"
+        "type": "logout_error",
+        "message": "Não foi possível fazer o logout. Por favor, tente novamente."
     }
 }

@@ -10,15 +10,30 @@ class DioHttpService extends HttpService {
     final interceptors = InterceptorsWrapper(
       onRequest: (options, handler) async{
         await MyHttpInterceptor().onRequest(options);
-        handler.next(options);
+        return handler.next(options);
       },
       onResponse: (response, handler) async{
         await MyHttpInterceptor().onResponse(response);
-        handler.next(response);
+        return handler.next(response);
       },
       onError: (error, handler) async{
-        await MyHttpInterceptor().onError(error);
-        handler.next(error);
+        bool errorAlreadySolved = false;
+        await MyHttpInterceptor().onError(error, retry: (options) async{
+          final retryResponse = await _dio.request(
+            options.path,
+            data: options.data,
+            options: Options(
+              method: options.method,
+              headers: options.headers,
+            )
+          );
+          errorAlreadySolved = true;
+          return handler.resolve(retryResponse);
+        });
+
+        if(!errorAlreadySolved) {
+          return handler.next(error);
+        }
       }
     );
 
@@ -52,8 +67,8 @@ class DioHttpService extends HttpService {
     return await _dio.put(url ?? "", data: data, options: _getOptionsParams());
   }
 
-  Options _getOptionsParams() {
 
+  Options _getOptionsParams() {
     return Options(
       headers: _defaultConfigHeader(),
       contentType: Headers.jsonContentType,

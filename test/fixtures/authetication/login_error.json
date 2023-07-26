@@ -1,6 +1,6 @@
 {
     "response": {
-        "type": "Error",
+        "type": "signin_error",
         "message": "E-mail ou Senha não são válidos."
     }
 }

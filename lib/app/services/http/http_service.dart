@@ -1,5 +1,5 @@
 
-const String baseUrl = "http://192.168.0.5/api-tokenization/api";
+const String baseUrl = "http://192.168.0.9/api-tokenization/api";
 
 abstract class HttpService {
   Future<dynamic> get<T>(String? url);
@@ -12,5 +12,5 @@ abstract class HttpService {
 abstract class MyInterceptor<TRequest, TResponse, TError> {
   Future<TRequest> onRequest(TRequest request);
   Future<TResponse> onResponse(TResponse response);
-  Future<TError> onError(TError error);
+  Future<TError> onError(TError error, {Function(dynamic options)? retry});
 }

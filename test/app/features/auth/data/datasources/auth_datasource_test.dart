@@ -4,6 +4,7 @@ import 'package:authentication_flutter/app/features/auth/data/datasources/auth_d
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/user.model.dart';
+import 'package:authentication_flutter/app/features/auth/domain/entities/token_entity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -73,16 +74,16 @@ void main() {
       //arrange
       final response = json.decode(fixture("authetication/login_success.json"));
       when(mockHttpService.post(any, data: anyNamed('data')))
-          .thenAnswer((_) async => Response(
-                data: response,
-                statusCode: 200,
-                requestOptions: RequestOptions(),
-              ));
+        .thenAnswer((_) async => Response(
+          data: response,
+          statusCode: 200,
+          requestOptions: RequestOptions(),
+      ));
       //act
       final result = await authDataSource.signIn(model);
       //assert
-      expect(result, equals(isA<Map>()));
-      expect(result?["access_token"], response["access_token"]);
+      expect(result, equals(isA<TokenEntity>()));
+      expect(result?.accessToken, response["access_token"]);
     });
 
     test('should return internal fault when status code equals 400', () async {
@@ -192,8 +193,8 @@ void main() {
       //act
       final result = await authDataSource.refreshAccessToken(refreshToken);
       //assert
-      expect(result, isA<Map>());
-      expect(result?["response"]["message"], equals(response["response"]["message"]));
+      expect(result, isA<String>());
+      expect(result, equals(response["response"]["message"]));
     });
 
     test('should return 401 failure on refresh token', () async{

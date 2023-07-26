@@ -4,6 +4,7 @@ import 'package:authentication_flutter/app/core/error/failure.dart';
 import 'package:authentication_flutter/app/core/manager/session_manager.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart';
+import 'package:authentication_flutter/app/features/auth/data/models/token_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/user.model.dart';
 import 'package:authentication_flutter/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:authentication_flutter/app/services/storage/preferences_service.dart';
@@ -92,7 +93,7 @@ void main() {
        final responseError = await json.decode(fixture("authetication/created_account_error.json"));
        when(dataSource.signUp(model)).thenThrow(
           ServerException(
-            code: 404,
+            code: 400,
             type: responseError["response"]["type"],
             message: responseError["response"]["message"],
           ),
@@ -101,7 +102,7 @@ void main() {
         final result = await repository.signUp(model);
         //assert
         expect(result, equals(left(const ServerFailure(
-          type: "invalid_data",
+          type: "created_error",
           message: "O e-mail informado já existe."
         ))));
         verify(dataSource.signUp(model));
@@ -120,7 +121,7 @@ void main() {
       verifyInfoNetwork(true, () async {
         //arrange
         final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signIn(model)).thenAnswer((_) async => responseSuccess);
+        when(dataSource.signIn(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
         //act
         await repository.signIn(model);
         //assert
@@ -131,7 +132,8 @@ void main() {
     test('should return NoConectedException if the device is offline',(){
       verifyInfoNetwork(false, () async {
         //arrange
-        when(dataSource.signIn(model)).thenAnswer((_) async => {});
+        final jsonResponse = await json.decode(fixture("authetication/login_success.json"));
+        when(dataSource.signIn(model)).thenAnswer((_) async => TokenModel.fromJson(jsonResponse));
         //act
         final result = await repository.signIn(model);
         //assert
@@ -144,7 +146,7 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signIn(model)).thenAnswer((_) async => responseSuccess);
+        when(dataSource.signIn(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
         when(sessionManager.setAccessToken(responseSuccess["access_token"])).thenAnswer((_) async => true);
         when(sessionManager.setRefreshToken(responseSuccess["refresh_token"])).thenAnswer((_) async => true);
         //act
@@ -163,7 +165,7 @@ void main() {
         final responseError = await json.decode(fixture("authetication/login_error.json"));
         when(dataSource.signIn(model)).thenThrow(
           ServerException(
-            code: 404,
+            code: 400,
             type: responseError["response"]["type"],
             message: responseError["response"]["message"],
           ),
@@ -172,7 +174,7 @@ void main() {
         final result = await repository.signIn(model);
         //assert
         expect(result, equals(const Left(ServerFailure(
-          type: "Error",
+          type: "signin_error",
           message: "E-mail ou Senha não são válidos.",
         ))));
         verify(dataSource.signIn(model));
@@ -233,7 +235,7 @@ void main() {
         final responseError = await json.decode(fixture("authetication/current_user_error.json"));
         when(dataSource.currentUser()).thenThrow(
           ServerException(
-            code: 404,
+            code: 401,
             type: responseError["response"]["type"],
             message: responseError["response"]["message"],
           ),
@@ -243,8 +245,8 @@ void main() {
         //assert
         expect(result, equals(left(
           const ServerFailure(
-            type: "Error",
-            message: "Houve um erro ao tentar recuperar dados do usuário",
+            type: "token_expired",
+            message: "Expired token",
           ),
         )));
         verify(dataSource.currentUser());
@@ -259,8 +261,6 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         when(dataSource.logout()).thenAnswer((_) async => true);
-        when(preferencesService.remove(key: "user_profile")).thenAnswer((_) async => true);
-        when(sessionManager.clear()).thenAnswer((_) => Future<void>.value());
         //act
         await repository.logout();
         //assert
@@ -272,7 +272,6 @@ void main() {
       verifyInfoNetwork(false, () async{
         //arrange
         when(dataSource.logout()).thenAnswer((_) async => true);
-        when(preferencesService.remove(key: "user_profile")).thenAnswer((_) async => true);
         //act
         final result = await repository.logout();
         //assert
@@ -284,17 +283,12 @@ void main() {
     test("should return true when performing logout", (){
       verifyInfoNetwork(true, () async{
         //arrange
-        when(preferencesService.remove(key: "user_profile")).thenAnswer((_) async => true);
-        when(sessionManager.clear()).thenAnswer((_) => Future<void>.value());
-
         final response = await json.decode(fixture("authetication/logout_success.json"))["response"];
         when(dataSource.logout()).thenAnswer((_) async => response["message"]);
         //act
         final result = await repository.logout();
         //assert
         expect(result?.isRight(), equals(true));
-        verify(preferencesService.remove(key: "user_profile"));
-        verify(sessionManager.clear());
         verify(dataSource.logout());
         verifyNoMoreInteractions(dataSource);
       });
@@ -304,10 +298,9 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final response = await json.decode(fixture("authetication/logout_error.json"))["response"];
-        when(preferencesService.remove(key: "user_profile")).thenAnswer((_) async => true);
         when(dataSource.logout()).thenThrow(
           ServerException(
-            code: 401, 
+            code: 400, 
             type: response["type"], 
             message: response["message"],
         ));
@@ -316,24 +309,23 @@ void main() {
         //assert
         expect(result, equals(left(
           const ServerFailure(
-            type: "unauthorized", 
-            message: "Expired token"
+            type: "logout_error", 
+            message: "Não foi possível fazer o logout. Por favor, tente novamente."
         ))));
-        verify(preferencesService.remove(key: "user_profile"));
-        verify(sessionManager.clear());
         verify(dataSource.logout());
         verifyNoMoreInteractions(dataSource);
       });
     });
   });
 
-  group('refreshToken', () {
+  group('refreshToken', (){
     test('should check if the device in online', (){
       verifyInfoNetwork(true, () async{
         //arrange
-        when(sessionManager.getRefreshToken()).thenAnswer((_) => "value");
-        when(dataSource.refreshAccessToken("value")).thenAnswer((_) async => {});
-        when(sessionManager.setAccessToken("value")).thenAnswer((_) async => true);
+        final refreshToken = await json.decode(fixture("authetication/login_success.json"))["refresh_token"];
+        when(sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
+        when(dataSource.refreshAccessToken(refreshToken)).thenAnswer((_) async => refreshToken);
+        when(sessionManager.setAccessToken(refreshToken)).thenAnswer((_) async => true);
         //act
         await repository.refreshAccessToken();
         //assert
@@ -344,7 +336,8 @@ void main() {
     test('should return NoConectedException if the device is offline', (){
       verifyInfoNetwork(false, () async{
         //arrange
-        when(dataSource.refreshAccessToken("value")).thenAnswer((_) async => {});
+        final refreshToken = await json.decode(fixture("authetication/login_success.json"))["refresh_token"];
+        when(dataSource.refreshAccessToken("value")).thenAnswer((_) async => refreshToken);
         //act
         final result = await repository.refreshAccessToken();
         //assert
@@ -356,16 +349,17 @@ void main() {
     test('should return a new access_token in case of [200] ', (){
       verifyInfoNetwork(true, () async{
         //arrange
-        when(sessionManager.getRefreshToken()).thenAnswer((_) => "value");
-        when(dataSource.refreshAccessToken("value")).thenAnswer((_) async => {"access_token":"value"});
-        when(sessionManager.setAccessToken("value")).thenAnswer((_) async => true);
+        final refreshToken = await json.decode(fixture("authetication/login_success.json"))["refresh_token"];
+        when(sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
+        when(dataSource.refreshAccessToken(refreshToken)).thenAnswer((_) async => refreshToken);
+        when(sessionManager.setAccessToken(refreshToken)).thenAnswer((_) async => true);
         //act
         final result = await repository.refreshAccessToken();
         //assert
         expect(result?.isRight(), equals(true));
         verify(sessionManager.getRefreshToken());
-        verify(dataSource.refreshAccessToken("value"));
-        verify(sessionManager.setAccessToken("value"));
+        verify(dataSource.refreshAccessToken(refreshToken));
+        verify(sessionManager.setAccessToken(refreshToken));
         verifyNoMoreInteractions(dataSource);
       });
     });
@@ -373,23 +367,24 @@ void main() {
     test('should return a failure when refreshing the access_token', (){
       verifyInfoNetwork(true, () async{
         //arrange
-        when(sessionManager.getRefreshToken()).thenAnswer((_) => "value");
-        when(dataSource.refreshAccessToken("value")).thenThrow(
-          const ServerException(
-            code: 401, 
-            type: "refresh_token_error", 
-            message: "O token informado não foi encontrado para esse usuário."
+        final refreshToken = await json.decode(fixture("authetication/login_success.json"))["refresh_token"];
+        when(sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
+        when(dataSource.refreshAccessToken(refreshToken)).thenThrow(
+          ServerException(
+          code: 401, 
+          type: "unauthorized", 
+          message: "Signature verification failed"
         ));
         //act
         final result = await repository.refreshAccessToken();
         //assert
         expect(result, equals(const Left(
-           ServerFailure(
-            type: "refresh_token_error", 
-            message: "O token informado não foi encontrado para esse usuário." 
+          ServerFailure(
+            type: "unauthorized", 
+            message: "Signature verification failed" 
         ))));
         verify(sessionManager.getRefreshToken());
-        verify(dataSource.refreshAccessToken("value"));
+        verify(dataSource.refreshAccessToken(refreshToken));
         verifyNoMoreInteractions(dataSource);
       });
     });

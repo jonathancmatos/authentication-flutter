@@ -57,8 +57,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
           //Save data to SharedPreferences
           final storage = Modular.get<SessionManager>();
-          await storage.setAccessToken(response?["access_token"]);
-          await storage.setRefreshToken(response?["refresh_token"]);
+          await storage.setAccessToken(response?.accessToken ?? "");
+          await storage.setRefreshToken(response?.refreshToken ?? "");
 
           return const Right(true);
         } on InternalException {
@@ -109,14 +109,11 @@ class AuthRepositoryImpl implements AuthRepository {
       (success) async {
         try {
           final response = await dataSource.logout();
-          await _clearSessionsAndStorages();
-
           return Right(response ?? false);
-        } on InternalException {
-          await _clearSessionsAndStorages();  
+          
+        } on InternalException { 
           return Left(InternalFailure());
-        } on ServerException catch (e) {
-          await _clearSessionsAndStorages();  
+        } on ServerException catch (e) {  
           return Left(ServerFailure(type: e.type, message: e.message));
         } on NoConnectionException {
           return Left(NoConnectionFailure());
@@ -135,8 +132,8 @@ class AuthRepositoryImpl implements AuthRepository {
           String refreshToken = session.getRefreshToken().toString();
 
           final response = await dataSource.refreshAccessToken(refreshToken);
-          if (response != null && response["access_token"].toString().isNotEmpty) {
-            await session.setAccessToken(response["access_token"].toString());
+          if (response != null && response.isNotEmpty) {
+            await session.setAccessToken(response);
           }
 
           return const Right(true);
@@ -148,15 +145,6 @@ class AuthRepositoryImpl implements AuthRepository {
           return Left(NoConnectionFailure());
         }
     });
-  }
-
-  Future<void> _clearSessionsAndStorages() async {
-    //Clear profile data
-    final storage = Modular.get<PreferencesService>();
-    await storage.remove(key: keyProfile);
-    //Clear Sessions
-    final session = Modular.get<SessionManager>();
-    await session.clear();
   }
 
   Future<Either<Failure, bool>> _checkNetworkConnected() async {

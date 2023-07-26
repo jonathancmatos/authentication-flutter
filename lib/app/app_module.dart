@@ -5,6 +5,7 @@ import 'package:authentication_flutter/app/features/auth/data/repositories/auth_
 import 'package:authentication_flutter/app/features/auth/domain/usercases/get_current_user.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/logout.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/new_account.dart';
+import 'package:authentication_flutter/app/features/auth/domain/usercases/regenerate_access_token.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/sign_in_with_email.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/signin/signin_screen.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/signin/states/signin_store.dart';
@@ -46,6 +47,7 @@ class AppModule extends Module {
       dataSource: i()
     )),
     // Auth -> Usercases
+    Bind.factory((i) => RegenerateAccessTokenImpl(i())),
     Bind.factory((i) => GetCurrentUserImpl(i())),
     Bind.factory((i) => NewAccountImpl(i())),
     Bind.factory((i) => SignInWithEmailImpl(i())),

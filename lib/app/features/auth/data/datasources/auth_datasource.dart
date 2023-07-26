@@ -1,18 +1,18 @@
 import 'dart:io';
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
+import 'package:authentication_flutter/app/features/auth/data/models/token_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/user.model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart';
 import 'package:authentication_flutter/app/services/http/http_service.dart';
-import 'package:authentication_flutter/app/services/http/response/exception_conveted.dart';
 import 'package:dio/dio.dart';
 
 abstract class AuthDataSource {
   Future<bool>? signUp(AccountModel model);
-  Future<Map<String, dynamic>>? signIn(SignInModel model);
+  Future<TokenModel>? signIn(SignInModel model);
   Future<UserModel>? currentUser();
   Future<bool>? logout();
-  Future<Map<String, dynamic>>? refreshAccessToken(String refreshToken);
+  Future<String>? refreshAccessToken(String refreshToken);
 }
 
 class AuthDataSourceImpl extends AuthDataSource {
@@ -30,7 +30,7 @@ class AuthDataSourceImpl extends AuthDataSource {
 
       return response.statusCode == 200;
     } on DioError catch (e) {
-      throw serverExceptionConverted(e.response);
+      throw ServerException(response: e.response);
     } on SocketException {
       throw NoConnectionException();
     } on Exception {
@@ -39,7 +39,7 @@ class AuthDataSourceImpl extends AuthDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>>? signIn(SignInModel model) async {
+  Future<TokenModel>? signIn(SignInModel model) async {
     try {
       final formData = FormData.fromMap(model.toJson());
       final response = await httpService.post(
@@ -47,12 +47,14 @@ class AuthDataSourceImpl extends AuthDataSource {
         data: formData,
       );
 
-      if (response.statusCode == 200) {
-        return response.data;
+      if (response.statusCode != 200) {
+        throw InternalException();
       }
-      return {};
+
+      return TokenModel.fromJson(response.data);
+      
     } on DioError catch (e) {
-      throw serverExceptionConverted(e.response);
+      throw ServerException(response: e.response);
     } on SocketException {
       throw NoConnectionException();
     } on Exception {
@@ -72,7 +74,7 @@ class AuthDataSourceImpl extends AuthDataSource {
       return throw InternalException();
 
     } on DioError catch (e) {
-      throw serverExceptionConverted(e.response);
+      throw ServerException(response: e.response);
     } on SocketException {
       throw NoConnectionException();
     } on Exception {
@@ -88,7 +90,7 @@ class AuthDataSourceImpl extends AuthDataSource {
       return response.statusCode == 200;
 
     }on DioError catch(e){
-      throw serverExceptionConverted(e.response);
+      throw ServerException(response: e.response);
     }on SocketException{
       throw NoConnectionException();
     } on Exception{
@@ -97,7 +99,7 @@ class AuthDataSourceImpl extends AuthDataSource {
   }
   
   @override
-  Future<Map<String, dynamic>>? refreshAccessToken(String refreshToken) async{
+  Future<String>? refreshAccessToken(String refreshToken) async{
     try{
 
       final response = await httpService.post(
@@ -105,14 +107,14 @@ class AuthDataSourceImpl extends AuthDataSource {
         data: FormData.fromMap({"refresh_token":refreshToken}),
       );
 
-      if(response.statusCode == 200){
-        return response.data;
+      if(response.statusCode != 200){
+        return "";
       }
 
-      return {};
+      return response.data["response"]["message"];
 
     }on DioError catch(e){
-      throw serverExceptionConverted(e.response);
+      throw ServerException(response: e.response);
     }on SocketException{
       throw NoConnectionException();
     }on Exception{

@@ -3,12 +3,23 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i5;
 
+import 'package:authentication_flutter/app/core/error/failure.dart' as _i11;
 import 'package:authentication_flutter/app/core/manager/session_manager.dart'
-    as _i2;
-import 'package:authentication_flutter/app/services/storage/preferences_service.dart'
     as _i4;
+import 'package:authentication_flutter/app/core/manager/user_manager_store.dart'
+    as _i7;
+import 'package:authentication_flutter/app/features/auth/domain/entities/user_entity.dart'
+    as _i8;
+import 'package:authentication_flutter/app/features/auth/domain/repositories/auth_repository.dart'
+    as _i3;
+import 'package:authentication_flutter/app/features/auth/domain/usercases/regenerate_access_token.dart'
+    as _i9;
+import 'package:authentication_flutter/app/services/storage/preferences_service.dart'
+    as _i6;
+import 'package:fpdart/fpdart.dart' as _i10;
+import 'package:mobx/mobx.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -22,61 +33,83 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
+class _FakeReactiveContext_0 extends _i1.SmartFake
+    implements _i2.ReactiveContext {
+  _FakeReactiveContext_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeAuthRepository_1 extends _i1.SmartFake
+    implements _i3.AuthRepository {
+  _FakeAuthRepository_1(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [SessionManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSessionManager extends _i1.Mock implements _i2.SessionManager {
+class MockSessionManager extends _i1.Mock implements _i4.SessionManager {
   MockSessionManager() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<void> setAccessToken(String? value) => (super.noSuchMethod(
+  _i5.Future<void> setAccessToken(String? value) => (super.noSuchMethod(
         Invocation.method(
           #setAccessToken,
           [value],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
   @override
-  _i3.Future<void> setRefreshToken(String? value) => (super.noSuchMethod(
+  _i5.Future<void> setRefreshToken(String? value) => (super.noSuchMethod(
         Invocation.method(
           #setRefreshToken,
           [value],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
   @override
-  _i3.Future<void> clear() => (super.noSuchMethod(
+  _i5.Future<void> clear() => (super.noSuchMethod(
         Invocation.method(
           #clear,
           [],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 }
 
 /// A class which mocks [PreferencesService].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPreferencesService extends _i1.Mock
-    implements _i4.PreferencesService {
+    implements _i6.PreferencesService {
   MockPreferencesService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<bool> containsKey({required String? key}) => (super.noSuchMethod(
+  _i5.Future<bool> containsKey({required String? key}) => (super.noSuchMethod(
         Invocation.method(
           #containsKey,
           [],
           {#key: key},
         ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
   @override
   String? read({required String? key}) => (super.noSuchMethod(Invocation.method(
         #read,
@@ -84,16 +117,16 @@ class MockPreferencesService extends _i1.Mock
         {#key: key},
       )) as String?);
   @override
-  _i3.Future<bool> remove({required String? key}) => (super.noSuchMethod(
+  _i5.Future<bool> remove({required String? key}) => (super.noSuchMethod(
         Invocation.method(
           #remove,
           [],
           {#key: key},
         ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
   @override
-  _i3.Future<bool> save({
+  _i5.Future<bool> save({
     required String? key,
     required String? value,
   }) =>
@@ -106,6 +139,89 @@ class MockPreferencesService extends _i1.Mock
             #value: value,
           },
         ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
+}
+
+/// A class which mocks [UserManagerStore].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockUserManagerStore extends _i1.Mock implements _i7.UserManagerStore {
+  MockUserManagerStore() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  set user(_i8.UserEntity? _user) => super.noSuchMethod(
+        Invocation.setter(
+          #user,
+          _user,
+        ),
+        returnValueForMissingStub: null,
+      );
+  @override
+  bool get isLoading => (super.noSuchMethod(
+        Invocation.getter(#isLoading),
+        returnValue: false,
+      ) as bool);
+  @override
+  bool get isLogged => (super.noSuchMethod(
+        Invocation.getter(#isLogged),
+        returnValue: false,
+      ) as bool);
+  @override
+  _i2.ReactiveContext get context => (super.noSuchMethod(
+        Invocation.getter(#context),
+        returnValue: _FakeReactiveContext_0(
+          this,
+          Invocation.getter(#context),
+        ),
+      ) as _i2.ReactiveContext);
+  @override
+  _i5.Future<void> getCurrentUser() => (super.noSuchMethod(
+        Invocation.method(
+          #getCurrentUser,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+  @override
+  _i5.Future<void> logoff({bool? isExpiredToken = false}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #logoff,
+          [],
+          {#isExpiredToken: isExpiredToken},
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+}
+
+/// A class which mocks [RegenerateAccessTokenImpl].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockRegenerateAccessTokenImpl extends _i1.Mock
+    implements _i9.RegenerateAccessTokenImpl {
+  MockRegenerateAccessTokenImpl() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.AuthRepository get repository => (super.noSuchMethod(
+        Invocation.getter(#repository),
+        returnValue: _FakeAuthRepository_1(
+          this,
+          Invocation.getter(#repository),
+        ),
+      ) as _i3.AuthRepository);
+  @override
+  _i5.Future<_i10.Either<_i11.Failure, bool?>?> call() => (super.noSuchMethod(
+        Invocation.method(
+          #call,
+          [],
+        ),
+        returnValue: _i5.Future<_i10.Either<_i11.Failure, bool?>?>.value(),
+      ) as _i5.Future<_i10.Either<_i11.Failure, bool?>?>);
 }

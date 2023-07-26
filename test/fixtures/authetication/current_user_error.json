@@ -1,6 +1,6 @@
 {
     "response": {
-        "type": "Error",
-        "message": "Houve um erro ao tentar recuperar dados do usuário"
+        "type": "token_expired",
+        "message": "Expired token"
     }
 }
