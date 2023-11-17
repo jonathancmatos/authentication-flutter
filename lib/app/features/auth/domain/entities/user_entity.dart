@@ -5,11 +5,13 @@ class UserEntity extends Equatable{
   final String name;
   final String email;
   final String phone;
+  final String? googleId;
 
   const UserEntity({
     required this.name, 
     required this.email, 
     required this.phone,
+    this.googleId
   });
   
   @override

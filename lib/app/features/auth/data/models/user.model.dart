@@ -5,14 +5,16 @@ class UserModel extends UserEntity{
   const UserModel({
     required String name, 
     required String email, 
-    required String phone
-  }):super(name: name, email: email, phone: phone);
+    required String phone,
+    String? googleId
+  }):super(name: name, email: email, phone: phone, googleId: googleId);
 
   factory UserModel.fromJson(Map<String, dynamic> json){
     return UserModel(
       name: json["name"] ?? "",
       email: json["email"] ?? "",
       phone: json["phone"] ?? "",
+      googleId: json['id_google']
     );
   }
 
@@ -20,12 +22,13 @@ class UserModel extends UserEntity{
     return {
       "name":name,
       "email":email,
-      "phone":phone
+      "phone":phone,
+      "google_id":googleId
     };
   }
 
   @override
   String toString() {
-    return "{UserModel:name:$name, email:$email, phone:$phone}";
+    return "{UserModel:name:$name, email:$email, phone:$phone, google_id:$googleId}";
   }
 }

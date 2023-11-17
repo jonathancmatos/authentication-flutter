@@ -231,9 +231,10 @@ class MockAuthRepository extends _i1.Mock implements _i5.AuthRepository {
         [account],
       )) as _i4.Future<_i6.Either<_i7.Failure, bool>>?);
   @override
-  _i4.Future<_i6.Either<_i7.Failure, bool>>? signIn(_i9.SignInEntity? signIn) =>
+  _i4.Future<_i6.Either<_i7.Failure, bool>>? signInWithEmail(
+          _i9.SignInEntity? signIn) =>
       (super.noSuchMethod(Invocation.method(
-        #signIn,
+        #signInWithEmail,
         [signIn],
       )) as _i4.Future<_i6.Either<_i7.Failure, bool>>?);
 }
@@ -253,9 +254,9 @@ class MockAuthDataSource extends _i1.Mock implements _i10.AuthDataSource {
         [model],
       )) as _i4.Future<bool>?);
   @override
-  _i4.Future<_i12.TokenModel>? signIn(_i13.SignInModel? model) =>
+  _i4.Future<_i12.TokenModel>? signInWithEmail(_i13.SignInModel? model) =>
       (super.noSuchMethod(Invocation.method(
-        #signIn,
+        #signInWithEmail,
         [model],
       )) as _i4.Future<_i12.TokenModel>?);
   @override

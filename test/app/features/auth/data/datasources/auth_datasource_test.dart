@@ -5,19 +5,27 @@ import 'package:authentication_flutter/app/features/auth/data/models/account_mod
 import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/user.model.dart';
 import 'package:authentication_flutter/app/features/auth/domain/entities/token_entity.dart';
+import 'package:authentication_flutter/app/services/social/google_sign_in.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import '../../../../../fixtures/fixture_reader.dart';
 import '../../mocks/auth_mock.mocks.dart';
 
+class MockGoogleAuth extends Mock implements GoogleAuthImpl {}
+
 void main() {
   late MockDioHttpService mockHttpService;
   late AuthDataSourceImpl authDataSource;
+  late MockGoogleAuth mockGoogleAuth;
 
   setUp(() {
     mockHttpService = MockDioHttpService();
-    authDataSource = AuthDataSourceImpl(mockHttpService);
+    mockGoogleAuth = MockGoogleAuth();
+    authDataSource = AuthDataSourceImpl(
+      httpService: mockHttpService,
+      googleAuth: mockGoogleAuth
+    );
   });
 
   group("signUp", () {
@@ -80,7 +88,7 @@ void main() {
           requestOptions: RequestOptions(),
       ));
       //act
-      final result = await authDataSource.signIn(model);
+      final result = await authDataSource.signInWithEmail(model);
       //assert
       expect(result, equals(isA<TokenEntity>()));
       expect(result?.accessToken, response["access_token"]);
@@ -88,7 +96,7 @@ void main() {
 
     test('should return internal fault when status code equals 400', () async {
       //arrange
-      final response = json.decode(fixture("authetication/login_error.json"));
+      final response = json.decode(fixture("authetication/login_with_email_error.json"));
       when(mockHttpService.post(any, data: anyNamed('data'))).thenThrow(
         DioError(
           requestOptions: RequestOptions(),
@@ -100,7 +108,7 @@ void main() {
         ),
       );
       //act
-      final call = authDataSource.signIn;
+      final call = authDataSource.signInWithEmail;
       //assert
       expect(() async => await call(model), throwsA(isA<ServerException>()));
     });
@@ -125,7 +133,7 @@ void main() {
 
     test('should return a 400 error when there is a problem in the api', () async{
       //arrange
-      final response = await json.decode(fixture("authetication/login_error.json"));
+      final response = await json.decode(fixture("authetication/login_with_email_error.json"));
       when(mockHttpService.get(any)).thenThrow(
         DioError(
           requestOptions: RequestOptions(),

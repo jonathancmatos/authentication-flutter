@@ -16,6 +16,7 @@ import '../../../../../fixtures/fixture_reader.dart';
 import '../../../../bootstrap/modular_test.dart';
 import '../../mocks/auth_mock.mocks.dart';
 
+
 void main() {
   late AuthRepositoryImpl repository;
   late MockAuthDataSource dataSource;
@@ -111,7 +112,7 @@ void main() {
     });
   });
 
-  group("signIn", (){
+  group("signInWithEmail", (){
     const model = SignInModel(
       email: "contato@devjonathancosta.com",
       passwd: "12345678",
@@ -121,9 +122,9 @@ void main() {
       verifyInfoNetwork(true, () async {
         //arrange
         final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signIn(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
+        when(dataSource.signInWithEmail(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
         //act
-        await repository.signIn(model);
+        await repository.signInWithEmail(model);
         //assert
         verify(networkInfo.isConnected);
       });
@@ -133,9 +134,9 @@ void main() {
       verifyInfoNetwork(false, () async {
         //arrange
         final jsonResponse = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signIn(model)).thenAnswer((_) async => TokenModel.fromJson(jsonResponse));
+        when(dataSource.signInWithEmail(model)).thenAnswer((_) async => TokenModel.fromJson(jsonResponse));
         //act
-        final result = await repository.signIn(model);
+        final result = await repository.signInWithEmail(model);
         //assert
         expect(result, equals(Left(NoConnectionFailure())));
         verify(networkInfo.isConnected);
@@ -146,14 +147,14 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signIn(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
+        when(dataSource.signInWithEmail(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
         when(sessionManager.setAccessToken(responseSuccess["access_token"])).thenAnswer((_) async => true);
         when(sessionManager.setRefreshToken(responseSuccess["refresh_token"])).thenAnswer((_) async => true);
         //act
-        final result = await repository.signIn(model);
+        final result = await repository.signInWithEmail(model);
         //assert
         expect(result, equals(const Right(true)));
-        verify(dataSource.signIn(model));
+        verify(dataSource.signInWithEmail(model));
         verify(sessionManager.setAccessToken(responseSuccess["access_token"]));
         verify(sessionManager.setRefreshToken(responseSuccess["refresh_token"]));
       });
@@ -162,8 +163,8 @@ void main() {
     test('should return server failure when the call to datasource is unsuccessful', (){
       verifyInfoNetwork(true, () async{
         //arrange
-        final responseError = await json.decode(fixture("authetication/login_error.json"));
-        when(dataSource.signIn(model)).thenThrow(
+        final responseError = await json.decode(fixture("authetication/login_with_email_error.json"));
+        when(dataSource.signInWithEmail(model)).thenThrow(
           ServerException(
             code: 400,
             type: responseError["response"]["type"],
@@ -171,18 +172,86 @@ void main() {
           ),
         );
         //act
-        final result = await repository.signIn(model);
+        final result = await repository.signInWithEmail(model);
         //assert
         expect(result, equals(const Left(ServerFailure(
           type: "signin_error",
           message: "E-mail ou Senha não são válidos.",
         ))));
-        verify(dataSource.signIn(model));
+        verify(dataSource.signInWithEmail(model));
         verifyNoMoreInteractions(dataSource); 
       });
     });
   });
 
+  group("signInWithGoogle", (){
+
+    test('should check if the device is online', (){
+      verifyInfoNetwork(true, () async {
+        //arrange
+        final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
+        when(dataSource.signInWithGoogle()).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
+        //act
+        await repository.signInWithGoogle();
+        //assert
+        verify(networkInfo.isConnected);
+      });
+    });
+
+    test('should return NoConectedException if the device is offline',(){
+      verifyInfoNetwork(false, () async {
+        //arrange
+        final jsonResponse = await json.decode(fixture("authetication/login_success.json"));
+        when(dataSource.signInWithGoogle()).thenAnswer((_) async => TokenModel.fromJson(jsonResponse));
+        //act
+        final result = await repository.signInWithGoogle();
+        //assert
+        expect(result, equals(Left(NoConnectionFailure())));
+        verify(networkInfo.isConnected);
+      });
+    });
+
+    test('should return datasource data when the call to datasource is successful', (){
+      verifyInfoNetwork(true, () async{
+        //arrange
+        final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
+        when(dataSource.signInWithGoogle()).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
+        when(sessionManager.setAccessToken(responseSuccess["access_token"])).thenAnswer((_) async => true);
+        when(sessionManager.setRefreshToken(responseSuccess["refresh_token"])).thenAnswer((_) async => true);
+        //act
+        final result = await repository.signInWithGoogle();
+        //assert
+        expect(result, equals(const Right(true)));
+        verify(dataSource.signInWithGoogle());
+        verify(sessionManager.setAccessToken(responseSuccess["access_token"]));
+        verify(sessionManager.setRefreshToken(responseSuccess["refresh_token"]));
+      });
+    });
+
+    test('should return server failure when the call to datasource is unsuccessful', (){
+      verifyInfoNetwork(true, () async{
+        //arrange
+        final responseError = await json.decode(fixture("authetication/login_with_google_error.json"));
+        when(dataSource.signInWithGoogle()).thenThrow(
+          ServerException(
+            code: 00,
+            type: responseError["response"]["type"],
+            message: responseError["response"]["message"],
+          ),
+        );
+        //act
+        final result = await repository.signInWithGoogle();
+        //assert
+        expect(result, equals(const Left(ServerFailure(
+          type: "Error",
+          message: "Não foi possível realizar o login com o Google. Por favor, tente novamente.",
+        ))));
+        verify(dataSource.signInWithGoogle());
+        verifyNoMoreInteractions(dataSource); 
+      });
+    });
+  });
+  
   group('currentUser', () {
     test("should check if the device is online", (){
       verifyInfoNetwork(true, () async{

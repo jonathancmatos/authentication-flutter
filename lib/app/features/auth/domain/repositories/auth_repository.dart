@@ -7,7 +7,8 @@ import 'package:fpdart/fpdart.dart';
 abstract class AuthRepository {
   Future<Either<Failure, bool>>? refreshAccessToken();
   Future<Either<Failure, bool>>? signUp(NewAccountEntity account);
-  Future<Either<Failure, bool>>? signIn(SignInEntity signIn);
+  Future<Either<Failure, bool>>? signInWithEmail(SignInEntity signIn);
+  Future<Either<Failure, bool>>? signInWithGoogle();
   Future<Either<Failure, UserEntity>>? currentUser();
   Future<Either<Failure, bool>>? logout();
 }

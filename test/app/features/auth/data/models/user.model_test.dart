@@ -29,7 +29,8 @@ void main() {
     final expectedJsonMap = {
       "name":"Jonathan Costa",
       "email":"contato@devjonathancosta.com",
-      "phone":"88992967878"
+      "phone":"88992967878",
+      "google_id": ""
     };
     expect(result, equals(expectedJsonMap));
   });

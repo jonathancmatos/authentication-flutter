@@ -46,14 +46,40 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, bool>>? signIn(SignInEntity signIn) async {
+  Future<Either<Failure, bool>>? signInWithEmail(SignInEntity signIn) async {
     final isConnected = await _checkNetworkConnected();
     return await isConnected.fold(
       (failure) => Left(NoConnectionFailure()),
       (success) async {
         try {
           final model = SignInModel(email: signIn.email, passwd: signIn.passwd);
-          final response = await dataSource.signIn(model);
+          final response = await dataSource.signInWithEmail(model);
+
+          //Save data to SharedPreferences
+          final storage = Modular.get<SessionManager>();
+          await storage.setAccessToken(response?.accessToken ?? "");
+          await storage.setRefreshToken(response?.refreshToken ?? "");
+
+          return const Right(true);
+        } on InternalException {
+          return Left(InternalFailure());
+        } on ServerException catch (e) {
+          return Left(ServerFailure(type: e.type, message: e.message));
+        } on NoConnectionException {
+          return Left(NoConnectionFailure());
+        }
+      },
+    );
+  }
+
+  @override
+  Future<Either<Failure, bool>>? signInWithGoogle() async{
+    final isConnected = await _checkNetworkConnected();
+    return await isConnected.fold(
+      (failure) => Left(NoConnectionFailure()),
+      (success) async {
+        try {
+          final response = await dataSource.signInWithGoogle();
 
           //Save data to SharedPreferences
           final storage = Modular.get<SessionManager>();

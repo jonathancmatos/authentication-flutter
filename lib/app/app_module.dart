@@ -14,9 +14,11 @@ import 'package:authentication_flutter/app/features/auth/presentation/signup/sta
 import 'package:authentication_flutter/app/features/auth/presentation/home/home_screen.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/welcome/welcome_screen.dart';
 import 'package:authentication_flutter/app/services/http/dio_http_service.dart';
+import 'package:authentication_flutter/app/services/social/google_sign_in.dart';
 import 'package:authentication_flutter/app/services/storage/preferences_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/guards/authentication_guard.dart';
@@ -35,12 +37,20 @@ class AppModule extends Module {
     Bind.factory((i) => Dio()),
     Bind.factory((i) => DioHttpService(i())),
 
+    // CORE -> GoogleSignIn
+    Bind.factory((i) => GoogleSignIn()),
+    Bind.factory((i) => GoogleAuthImpl(i())),
+
     // Core -> Checked Network Connection
     Bind.factory((i) => InternetConnectionChecker()),
     Bind.factory((i) => NetworkInfoImpl(i())),
 
     // Auth -> Datasource
-    Bind.factory((i) => AuthDataSourceImpl(i())),
+    Bind.factory((i) => AuthDataSourceImpl(
+      httpService: i<DioHttpService>(),
+      googleAuth: i<GoogleAuthImpl>()
+    )),
+    
     // Auth -> Repository
     Bind.factory((i) => AuthRepositoryImpl(
       networkInfo: i(), 

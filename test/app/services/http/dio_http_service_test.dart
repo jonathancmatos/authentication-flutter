@@ -69,7 +69,7 @@ void main() {
     
     test('should call method post failure', () async {
       //arrange
-      final response = fixture("authetication/login_error.json");
+      final response = fixture("authetication/login_with_email_error.json");
       when(userManagerStore.logoff(isExpiredToken: false)).thenAnswer((_) async => {});
       when(sessionManager.getAccessToken()).thenAnswer((_) => token);
       dioAdapter.onPost("$baseUrl/signin", data: model.toJson(), (server) => server.throws(

@@ -5,19 +5,27 @@ import 'package:authentication_flutter/app/features/auth/data/models/token_model
 import 'package:authentication_flutter/app/features/auth/data/models/user.model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart';
 import 'package:authentication_flutter/app/services/http/http_service.dart';
+import 'package:authentication_flutter/app/services/social/google_sign_in.dart';
 import 'package:dio/dio.dart';
 
 abstract class AuthDataSource {
   Future<bool>? signUp(AccountModel model);
-  Future<TokenModel>? signIn(SignInModel model);
+  Future<TokenModel>? signInWithEmail(SignInModel model);
+  Future<TokenModel>? signInWithGoogle();
   Future<UserModel>? currentUser();
   Future<bool>? logout();
   Future<String>? refreshAccessToken(String refreshToken);
 }
 
 class AuthDataSourceImpl extends AuthDataSource {
+
   HttpService httpService;
-  AuthDataSourceImpl(this.httpService);
+  GoogleAuth googleAuth;
+
+  AuthDataSourceImpl({
+    required this.httpService,
+    required this.googleAuth
+  });
 
   @override
   Future<bool>? signUp(AccountModel model) async {
@@ -39,7 +47,7 @@ class AuthDataSourceImpl extends AuthDataSource {
   }
 
   @override
-  Future<TokenModel>? signIn(SignInModel model) async {
+  Future<TokenModel>? signInWithEmail(SignInModel model) async {
     try {
       final formData = FormData.fromMap(model.toJson());
       final response = await httpService.post(
@@ -60,6 +68,12 @@ class AuthDataSourceImpl extends AuthDataSource {
     } on Exception {
       throw InternalException();
     }
+  }
+
+   @override
+  Future<TokenModel>? signInWithGoogle() {
+    // TODO: implement signInWithGoogle
+    throw UnimplementedError();
   }
   
   @override
@@ -121,4 +135,5 @@ class AuthDataSourceImpl extends AuthDataSource {
       throw InternalException();
     }
   }
+
 }

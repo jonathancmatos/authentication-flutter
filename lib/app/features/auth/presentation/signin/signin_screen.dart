@@ -57,9 +57,17 @@ class SignInScreen extends StatelessWidget {
                       onPressed: store.signIn,
                       loading: store.isLoading,
                     ),
+                    const SizedBox(height: 24),
+                    //Button Sign Google
+                    CustomButton(
+                      text: "Entrar com o Google",
+                      onPressed: () {},
+                      loading: store.isLoading,
+                      background: Colors.redAccent,
+                    ),
                     const SizedBox(height: 40),
                     //Button New Account
-                    const ButtonNewAccount()
+                    const ButtonNewAccount(),
                   ],
                 ),
               ),

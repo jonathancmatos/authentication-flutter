@@ -13,6 +13,6 @@ class SignInWithEmailImpl implements SignInWithEmail {
 
   @override
   Future<Either<Failure, bool?>?> call(SignInEntity signIn) async {
-    return await repository.signIn(signIn);
+    return await repository.signInWithEmail(signIn);
   }
 }

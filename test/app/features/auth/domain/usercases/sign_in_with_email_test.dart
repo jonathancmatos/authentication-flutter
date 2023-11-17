@@ -21,13 +21,13 @@ void main() {
 
   test('Should get bool when logging in to repository', () async {
     //arrannge
-    when(mockAuthRepository.signIn(signIn))
+    when(mockAuthRepository.signInWithEmail(signIn))
         .thenAnswer((_) async => const Right(true));
     //act
     var result = await usecase.call(signIn);
     //assert
     expect(result, equals(isA<Right>()));
-    verify(mockAuthRepository.signIn(signIn));
+    verify(mockAuthRepository.signInWithEmail(signIn));
     verifyNoMoreInteractions(mockAuthRepository);
   });
 }
