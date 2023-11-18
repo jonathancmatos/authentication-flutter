@@ -2,6 +2,7 @@ import 'package:authentication_flutter/app/core/domain/entities/message.dart';
 import 'package:authentication_flutter/app/core/manager/user_manager_store.dart';
 import 'package:authentication_flutter/app/features/auth/domain/entities/sign_in_entity.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/sign_in_with_email.dart';
+import 'package:authentication_flutter/app/features/auth/domain/usercases/sign_in_with_google.dart';
 import 'package:authentication_flutter/app/utils/alert_message.dart';
 import 'package:authentication_flutter/app/utils/utils.dart';
 import 'package:authentication_flutter/app/utils/validators.dart';
@@ -16,8 +17,14 @@ const messageEmailNotValid = "Informe um e-mail válido.";
 const messagePasswdNotValid = "A senha não pode ser vazia.";
 
 abstract class _SignInStore with Store {
-  final SignInWithEmail _signInWithEmail;
-  _SignInStore(this._signInWithEmail);
+
+  final SignInWithEmail signInWithEmail;
+  final SignInWithGoogle signInWithGoogle;
+
+  _SignInStore({
+    required this.signInWithEmail,
+    required this.signInWithGoogle
+  });
 
   final formKey = GlobalKey<FormState>();
 
@@ -42,12 +49,14 @@ abstract class _SignInStore with Store {
   @computed
   bool get isFormValid => formKey.currentState!.validate();
 
-  Future<void> signIn() async {
-    if (isFormValid) {
+  Future<void> signIn({bool isSignSocial = false}) async {
+    if (isSignSocial || isFormValid) {
       _loading = true;
 
       final entity = SignInEntity(email: email, passwd: passwd);
-      final signInOrFailure = await _signInWithEmail.call(entity);
+      final signInOrFailure = !isSignSocial 
+        ? await signInWithEmail.call(entity)
+        : await signInWithGoogle.call();
 
       _loading = false;
       signInOrFailure?.fold(

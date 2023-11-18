@@ -61,7 +61,7 @@ class SignInScreen extends StatelessWidget {
                     //Button Sign Google
                     CustomButton(
                       text: "Entrar com o Google",
-                      onPressed: () {},
+                      onPressed: () => store.signIn(isSignSocial: true),
                       loading: store.isLoading,
                       background: Colors.redAccent,
                     ),

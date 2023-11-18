@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:authentication_flutter/app/core/error/exception.dart';
+import 'package:authentication_flutter/app/core/manager/user_manager_store.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/token_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/user.model.dart';
@@ -7,6 +8,8 @@ import 'package:authentication_flutter/app/features/auth/data/models/sign_in_mod
 import 'package:authentication_flutter/app/services/http/http_service.dart';
 import 'package:authentication_flutter/app/services/social/google_sign_in.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 abstract class AuthDataSource {
   Future<bool>? signUp(AccountModel model);
@@ -71,9 +74,36 @@ class AuthDataSourceImpl extends AuthDataSource {
   }
 
    @override
-  Future<TokenModel>? signInWithGoogle() {
-    // TODO: implement signInWithGoogle
-    throw UnimplementedError();
+  Future<TokenModel>? signInWithGoogle() async{
+   try {
+
+      final result = (await googleAuth.signIn()) as GoogleSignInAccount?;
+      final model = UserModel(
+        googleId: result?.id ?? '',
+        name: result?.displayName ?? '', 
+        email: result?.email ?? '', 
+        phone: ''
+      );
+
+      final formData = FormData.fromMap(model.toJson()); 
+      final response = await httpService.post(
+        "$baseUrl/google-sign-in",
+        data: formData,
+      );
+
+      if (response.statusCode != 200) {
+        throw InternalException();
+      }
+
+      return TokenModel.fromJson(response.data);
+      
+    } on DioError catch (e) {
+      throw ServerException(response: e.response);
+    } on SocketException {
+      throw NoConnectionException();
+    } on Exception {
+      throw InternalException();
+    }
   }
   
   @override
@@ -100,6 +130,13 @@ class AuthDataSourceImpl extends AuthDataSource {
   Future<bool>? logout() async{
     try{
       
+      final store = Modular.get<UserManagerStore>();
+      final googleId = store.user?.googleId ?? '';
+
+      if(googleId.isNotEmpty){
+        await googleAuth.logout();
+      }
+
       final response = await httpService.post("$baseUrl/logout");
       return response.statusCode == 200;
 

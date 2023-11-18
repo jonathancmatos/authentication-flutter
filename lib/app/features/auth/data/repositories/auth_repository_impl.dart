@@ -116,7 +116,9 @@ class AuthRepositoryImpl implements AuthRepository {
             name: response?.name ?? "",
             email: response?.email ?? "",
             phone: response?.phone ?? "",
+            googleId: response?.googleId
           ));
+          
         } on InternalException {
           return Left(InternalFailure());
         } on ServerException catch (e) {

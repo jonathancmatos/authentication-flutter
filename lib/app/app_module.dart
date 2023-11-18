@@ -23,6 +23,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/guards/authentication_guard.dart';
 import 'features/auth/data/datasources/auth_datasource.dart';
+import 'features/auth/domain/usercases/sign_in_with_google.dart';
 
 class AppModule extends Module {
 
@@ -61,11 +62,15 @@ class AppModule extends Module {
     Bind.factory((i) => GetCurrentUserImpl(i())),
     Bind.factory((i) => NewAccountImpl(i())),
     Bind.factory((i) => SignInWithEmailImpl(i())),
+    Bind.factory((i) => SignInWithGoogleImpl(i())),
     Bind.factory((i) => LogoutImpl(i())),
     // Auth -> Store
     Bind.singleton((i) => UserManagerStore(i<GetCurrentUserImpl>(),i<LogoutImpl>())),
     Bind.factory((i) => SignUpStore(i())),
-    Bind.factory((i) => SignInStore(i())),
+    Bind.factory((i) => SignInStore(
+      signInWithEmail: i<SignInWithEmailImpl>(),
+      signInWithGoogle: i<SignInWithGoogleImpl>()
+    )),
   ];
 
   @override
