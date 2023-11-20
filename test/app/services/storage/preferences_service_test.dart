@@ -14,6 +14,15 @@ void main() {
     preferencesService = PreferencesService(mockSharedPreferences);
   });
 
+  test('should return true when contains string data', () async {
+    //arrange
+    when(() => mockSharedPreferences.containsKey('key')).thenAnswer((_)  => true);
+    //act
+    final result = await preferencesService.containsKey(key: 'key');
+    //assert
+    expect(result, true);
+  });
+
   test('should return true when save string data', () async {
     //arrange
     when(() => mockSharedPreferences.setString('key', 'test'))

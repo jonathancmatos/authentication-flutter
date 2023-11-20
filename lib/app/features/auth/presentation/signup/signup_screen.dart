@@ -1,5 +1,7 @@
+import 'package:authentication_flutter/app/core/domain/entities/message.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/signup/states/signup_store.dart';
 import 'package:authentication_flutter/app/shared/components/custom_button.dart';
+import 'package:authentication_flutter/app/utils/alert_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -14,6 +16,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
 
+  final formKey = GlobalKey<FormState>();
   final store = Modular.get<SignUpStore>();
   final maskPhoneFormatter = MaskTextInputFormatter(mask: "(##) #####-####");
 
@@ -29,7 +32,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             child: Form(
-              key: store.formKey,
+              key: formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -99,7 +102,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   //Button Register
                   CustomButton(
                     text: "CADASTRAR",
-                    onPressed: store.signUp,
+                    onPressed: _signUp,
                     loading: store.isLoading,
                   )
                 ],
@@ -109,5 +112,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }),
       ),
     );
+  }
+
+  void _signUp() async{
+    if(formKey.currentState!.validate()){
+      await store.signUp(onSuccess: _onSuccess, onFailure: _onFailure);
+    }
+  }
+
+  void _onSuccess(){
+    formKey.currentState?.reset();
+    AlertMessage(message: "Cadastro realizado com sucesso !", type: TypeMessage.success).show();
+    Modular.to.pop();
+  }
+
+  void _onFailure(Message failure) {
+    AlertMessage(message: failure.text, type: TypeMessage.error).show();
   }
 }

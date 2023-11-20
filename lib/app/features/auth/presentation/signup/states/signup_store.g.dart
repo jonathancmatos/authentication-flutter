@@ -44,13 +44,6 @@ mixin _$SignUpStore on _SignUpStoreBase, Store {
           () => super.phoneValidator,
           name: '_SignUpStoreBase.phoneValidator'))
       .value;
-  Computed<bool>? _$isFormValidComputed;
-
-  @override
-  bool get isFormValid =>
-      (_$isFormValidComputed ??= Computed<bool>(() => super.isFormValid,
-              name: '_SignUpStoreBase.isFormValid'))
-          .value;
 
   late final _$_loadingAtom =
       Atom(name: '_SignUpStoreBase._loading', context: context);
@@ -217,8 +210,7 @@ nameValidator: ${nameValidator},
 emailValidator: ${emailValidator},
 passwdValidator: ${passwdValidator},
 passwdConfirmValidator: ${passwdConfirmValidator},
-phoneValidator: ${phoneValidator},
-isFormValid: ${isFormValid}
+phoneValidator: ${phoneValidator}
     ''';
   }
 }

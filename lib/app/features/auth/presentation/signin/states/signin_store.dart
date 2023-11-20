@@ -1,13 +1,10 @@
 import 'package:authentication_flutter/app/core/domain/entities/message.dart';
-import 'package:authentication_flutter/app/core/manager/user_manager_store.dart';
 import 'package:authentication_flutter/app/features/auth/domain/entities/sign_in_entity.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/sign_in_with_email.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/sign_in_with_google.dart';
-import 'package:authentication_flutter/app/utils/alert_message.dart';
 import 'package:authentication_flutter/app/utils/utils.dart';
 import 'package:authentication_flutter/app/utils/validators.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 part 'signin_store.g.dart';
 
@@ -25,8 +22,6 @@ abstract class _SignInStore with Store {
     required this.signInWithEmail,
     required this.signInWithGoogle
   });
-
-  final formKey = GlobalKey<FormState>();
 
   @observable
   bool _loading = false;
@@ -46,11 +41,12 @@ abstract class _SignInStore with Store {
   @computed
   String? get passwdValidator => passwd.isEmpty ? messagePasswdNotValid : null;
 
-  @computed
-  bool get isFormValid => formKey.currentState!.validate();
+  Future<void> signIn({
+    required VoidCallback onSuccess,
+    required Function(Message message) onError,
+    bool isSignSocial = false}) async {
 
-  Future<void> signIn({bool isSignSocial = false}) async {
-    if (isSignSocial || isFormValid) {
+    if (isSignSocial) {
       _loading = true;
 
       final entity = SignInEntity(email: email, passwd: passwd);
@@ -60,21 +56,10 @@ abstract class _SignInStore with Store {
 
       _loading = false;
       signInOrFailure?.fold(
-        (failure) => _onFailure(failureInExeptionConverted(failure)),
-        (success) => _onSuccess(),
+        (failure) => onError(failureInExeptionConverted(failure)),
+        (success) => onSuccess(),
       );
     }
   }
 
-  void _onSuccess() async{
-    formKey.currentState?.reset();
-    final store = Modular.get<UserManagerStore>();
-    await store.getCurrentUser().then((_){
-      if(store.isLogged) Modular.to.navigate("/me");
-    });
-  }
-
-  void _onFailure(Message failure) {
-    AlertMessage(message: failure.text, type: TypeMessage.error).show();
-  }
 }

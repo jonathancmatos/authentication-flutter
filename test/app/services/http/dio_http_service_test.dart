@@ -15,6 +15,7 @@ import '../../../fixtures/fixture_reader.dart';
 import '../../bootstrap/modular_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+
 void main() {
   late DioHttpService dioHttpService;
   late Dio dio;
@@ -72,7 +73,7 @@ void main() {
       when(() => userManagerStore.logoff(isExpiredToken: false)).thenAnswer((_) async => {});
       when(() => sessionManager.getAccessToken()).thenAnswer((_) => token);
       dioAdapter.onPost("$baseUrl/signin", data: model.toJson(), (server) => server.throws(
-        401, DioError(
+        401, DioException(
           requestOptions: RequestOptions(),
           response: Response(
             data: response,
@@ -82,11 +83,76 @@ void main() {
         ),
       ));
       //assert
-      await expectLater(dio.post("$baseUrl/signin"),throwsA(isA<DioError>()));
+      await expectLater(dio.post("$baseUrl/signin"),throwsA(isA<DioException>()));
       verifyNever(() => userManagerStore.logoff(isExpiredToken: false));
     });
   });
 
+  group('PUT', () {
+    const model = SignInModel(email: 'jonathancosta428@gmail.com', passwd: '12345678');
+
+    test('should call method put correctly', () async {
+      //arrange
+      final response = fixture("authetication/login_success.json");
+      when(() => sessionManager.getAccessToken()).thenAnswer((_) => token);
+      dioAdapter.onPut("$baseUrl/update", data: model.toJson() ,(server) => server.reply(200, {'data':response}, delay: const Duration(seconds: 1)));
+      //act
+      final result = await dioHttpService.put("$baseUrl/update", data: model.toJson());
+      //assert
+      expect(result.statusCode, equals(200));
+    });
+    
+    test('should call method put failure', () async {
+      //arrange
+      final response = fixture("authetication/login_with_email_error.json");
+      when(() => sessionManager.getAccessToken()).thenAnswer((_) => token);
+      dioAdapter.onPut("$baseUrl/update", data: model.toJson(), (server) => server.throws(
+        401, DioException(
+          requestOptions: RequestOptions(),
+          response: Response(
+            data: response,
+            statusCode: 401,
+            requestOptions: RequestOptions(),
+          ),
+        ),
+      ));
+      //assert
+      await expectLater(dio.put("$baseUrl/update"),throwsA(isA<DioException>()));
+    });
+  });
+
+  group('PATH', () {
+    const model = SignInModel(email: 'jonathancosta428@gmail.com', passwd: '12345678');
+
+    test('should call method path correctly', () async {
+      //arrange
+      final response = fixture("authetication/login_success.json");
+      when(() => sessionManager.getAccessToken()).thenAnswer((_) => token);
+      dioAdapter.onPatch("$baseUrl/upload", data: model.toJson() ,(server) => server.reply(200, {'data':response}, delay: const Duration(seconds: 1)));
+      //act
+      final result = await dioHttpService.patch("$baseUrl/upload", data: model.toJson());
+      //assert
+      expect(result.statusCode, equals(200));
+    });
+    
+    test('should call method path failure', () async {
+      //arrange
+      final response = fixture("authetication/login_with_email_error.json");
+      when(() => sessionManager.getAccessToken()).thenAnswer((_) => token);
+      dioAdapter.onPatch("$baseUrl/upload", data: model.toJson(), (server) => server.throws(
+        401, DioException(
+          requestOptions: RequestOptions(),
+          response: Response(
+            data: response,
+            statusCode: 401,
+            requestOptions: RequestOptions(),
+          ),
+        ),
+      ));
+      //assert
+      await expectLater(dio.patch("$baseUrl/upload"),throwsA(isA<DioException>()));
+    });
+  });
 
   group('GET', () {
 
@@ -108,7 +174,7 @@ void main() {
       when(() => sessionManager.getAccessToken()).thenAnswer((_) => token);
       when(() => regenerateAccessToken.call()).thenAnswer((_) async => Left(InternalFailure()));
       dioAdapter.onGet("$baseUrl/current-user", (server) => server.throws(
-        401, DioError(
+        401, DioException(
           requestOptions: RequestOptions(),
           response: Response(
             data: response,
@@ -117,8 +183,37 @@ void main() {
           ),
         )));
       //assert
-      await expectLater(dio.get("$baseUrl/current-user"),throwsA(isA<DioError>()));
+      await expectLater(dio.get("$baseUrl/current-user"),throwsA(isA<DioException>()));
       verify(() => userManagerStore.logoff(isExpiredToken: true));
+    });
+  });
+
+  group('DELETE', () {
+
+    test('should call method delete correctly', () async {
+      //arrange
+      when(() => sessionManager.getAccessToken()).thenAnswer((_) => token);
+      dioAdapter.onDelete("$baseUrl/delete", (server) => server.reply(200, {'data':true}, delay: const Duration(seconds: 1)));
+      //act
+      final result = await dioHttpService.delete("$baseUrl/delete");
+      //assert
+      expect(result.statusCode, equals(200));
+    });
+    
+    test('should call method delete failure', () async {
+      //arrange
+      when(() => sessionManager.getAccessToken()).thenAnswer((_) => token);
+      dioAdapter.onDelete("$baseUrl/delete", (server) => server.throws(
+        401, DioException(
+          type: DioExceptionType.connectionTimeout,
+          requestOptions: RequestOptions(),
+          response: Response(
+            statusCode: 401,
+            requestOptions: RequestOptions(),
+          ),
+        )));
+      //assert
+      await expectLater(dio.get("$baseUrl/delete"),throwsA(isA<DioException>()));
     });
   });
 }
