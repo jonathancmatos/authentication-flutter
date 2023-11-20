@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/core/error/failure.dart';
 import 'package:authentication_flutter/app/core/manager/session_manager.dart';
+import 'package:authentication_flutter/app/core/network/network_info.dart';
+import 'package:authentication_flutter/app/features/auth/data/datasources/auth_datasource.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/sign_in_model.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/token_model.dart';
@@ -11,11 +13,12 @@ import 'package:authentication_flutter/app/services/storage/preferences_service.
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import '../../../../../fixtures/fixture_reader.dart';
 import '../../../../bootstrap/modular_test.dart';
-import '../../mocks/auth_mock.mocks.dart';
 
+class MockAuthDataSource extends Mock implements AuthDataSourceImpl {}
+class MockNetworkInfo extends Mock implements NetworkInfo{}
 
 void main() {
   late AuthRepositoryImpl repository;
@@ -39,7 +42,7 @@ void main() {
 
   void verifyInfoNetwork(bool value, Function body){
     //arrange
-    when(networkInfo.isConnected).thenAnswer((_) async => value);
+    when(() => networkInfo.isConnected).thenAnswer((_) async => value);
     //act
     body();
   }
@@ -55,35 +58,35 @@ void main() {
     test('should check if the device is online', () {
       verifyInfoNetwork(true, () async {
         //arrange
-        when(dataSource.signUp(model)).thenAnswer((_) async => true);
+        when(() => dataSource.signUp(model)).thenAnswer((_) async => true);
         //act
         await repository.signUp(model);
         //assert
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
     test('should return NoConectedException if the device is offline',() {
       verifyInfoNetwork(false, () async {
         //arrange
-        when(dataSource.signUp(model)).thenAnswer((_) async => false);
+        when(() => dataSource.signUp(model)).thenAnswer((_) async => false);
         //act
         final result = await repository.signUp(model);
         //assert
         expect(result, equals(Left(NoConnectionFailure())));
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
     test('should return datasource data when the call to datasource is successful',() {
       verifyInfoNetwork(true, () async {
         //arrange
-        when(dataSource.signUp(model)).thenAnswer((_) async => true);
+        when(() => dataSource.signUp(model)).thenAnswer((_) async => true);
         //act
         final result = await repository.signUp(model);
         //assert
         expect(result, equals(const Right(true)));
-        verify(dataSource.signUp(model));
+        verify(() => dataSource.signUp(model));
         verifyNoMoreInteractions(dataSource);
       });      
     });
@@ -92,7 +95,7 @@ void main() {
       verifyInfoNetwork(true, () async {
        //arrange
        final responseError = await json.decode(fixture("authetication/created_account_error.json"));
-       when(dataSource.signUp(model)).thenThrow(
+       when(() => dataSource.signUp(model)).thenThrow(
           ServerException(
             code: 400,
             type: responseError["response"]["type"],
@@ -106,7 +109,7 @@ void main() {
           type: "created_error",
           message: "O e-mail informado já existe."
         ))));
-        verify(dataSource.signUp(model));
+        verify(() => dataSource.signUp(model));
         verifyNoMoreInteractions(dataSource);
       });    
     });
@@ -122,11 +125,13 @@ void main() {
       verifyInfoNetwork(true, () async {
         //arrange
         final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signInWithEmail(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
+        when(() => sessionManager.setAccessToken(responseSuccess["access_token"])).thenAnswer((_) async => true);
+        when(() => sessionManager.setRefreshToken(responseSuccess["refresh_token"])).thenAnswer((_) async => true);
+        when(() => dataSource.signInWithEmail(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
         //act
         await repository.signInWithEmail(model);
         //assert
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
@@ -134,12 +139,12 @@ void main() {
       verifyInfoNetwork(false, () async {
         //arrange
         final jsonResponse = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signInWithEmail(model)).thenAnswer((_) async => TokenModel.fromJson(jsonResponse));
+        when(() => dataSource.signInWithEmail(model)).thenAnswer((_) async => TokenModel.fromJson(jsonResponse));
         //act
         final result = await repository.signInWithEmail(model);
         //assert
         expect(result, equals(Left(NoConnectionFailure())));
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
@@ -147,16 +152,16 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signInWithEmail(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
-        when(sessionManager.setAccessToken(responseSuccess["access_token"])).thenAnswer((_) async => true);
-        when(sessionManager.setRefreshToken(responseSuccess["refresh_token"])).thenAnswer((_) async => true);
+        when(() => dataSource.signInWithEmail(model)).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
+        when(() => sessionManager.setAccessToken(responseSuccess["access_token"])).thenAnswer((_) async => true);
+        when(() => sessionManager.setRefreshToken(responseSuccess["refresh_token"])).thenAnswer((_) async => true);
         //act
         final result = await repository.signInWithEmail(model);
         //assert
         expect(result, equals(const Right(true)));
-        verify(dataSource.signInWithEmail(model));
-        verify(sessionManager.setAccessToken(responseSuccess["access_token"]));
-        verify(sessionManager.setRefreshToken(responseSuccess["refresh_token"]));
+        verify(() => dataSource.signInWithEmail(model));
+        verify(() => sessionManager.setAccessToken(responseSuccess["access_token"]));
+        verify(() => sessionManager.setRefreshToken(responseSuccess["refresh_token"]));
       });
     });
 
@@ -164,7 +169,7 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final responseError = await json.decode(fixture("authetication/login_with_email_error.json"));
-        when(dataSource.signInWithEmail(model)).thenThrow(
+        when(() => dataSource.signInWithEmail(model)).thenThrow(
           ServerException(
             code: 400,
             type: responseError["response"]["type"],
@@ -178,7 +183,7 @@ void main() {
           type: "signin_error",
           message: "E-mail ou Senha não são válidos.",
         ))));
-        verify(dataSource.signInWithEmail(model));
+        verify(() => dataSource.signInWithEmail(model));
         verifyNoMoreInteractions(dataSource); 
       });
     });
@@ -190,11 +195,11 @@ void main() {
       verifyInfoNetwork(true, () async {
         //arrange
         final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signInWithGoogle()).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
+        when(() => dataSource.signInWithGoogle()).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
         //act
         await repository.signInWithGoogle();
         //assert
-        verify(networkInfo.isConnected);
+        verify(() =>networkInfo.isConnected);
       });
     });
 
@@ -202,12 +207,12 @@ void main() {
       verifyInfoNetwork(false, () async {
         //arrange
         final jsonResponse = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signInWithGoogle()).thenAnswer((_) async => TokenModel.fromJson(jsonResponse));
+        when(() => dataSource.signInWithGoogle()).thenAnswer((_) async => TokenModel.fromJson(jsonResponse));
         //act
         final result = await repository.signInWithGoogle();
         //assert
         expect(result, equals(Left(NoConnectionFailure())));
-        verify(networkInfo.isConnected);
+        verify(() =>networkInfo.isConnected);
       });
     });
 
@@ -215,16 +220,16 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final responseSuccess = await json.decode(fixture("authetication/login_success.json"));
-        when(dataSource.signInWithGoogle()).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
-        when(sessionManager.setAccessToken(responseSuccess["access_token"])).thenAnswer((_) async => true);
-        when(sessionManager.setRefreshToken(responseSuccess["refresh_token"])).thenAnswer((_) async => true);
+        when(() => dataSource.signInWithGoogle()).thenAnswer((_) async => TokenModel.fromJson(responseSuccess));
+        when(() => sessionManager.setAccessToken(responseSuccess["access_token"])).thenAnswer((_) async => true);
+        when(() => sessionManager.setRefreshToken(responseSuccess["refresh_token"])).thenAnswer((_) async => true);
         //act
         final result = await repository.signInWithGoogle();
         //assert
         expect(result, equals(const Right(true)));
-        verify(dataSource.signInWithGoogle());
-        verify(sessionManager.setAccessToken(responseSuccess["access_token"]));
-        verify(sessionManager.setRefreshToken(responseSuccess["refresh_token"]));
+        verify(() => dataSource.signInWithGoogle());
+        verify(() => sessionManager.setAccessToken(responseSuccess["access_token"]));
+        verify(() => sessionManager.setRefreshToken(responseSuccess["refresh_token"]));
       });
     });
 
@@ -232,7 +237,7 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final responseError = await json.decode(fixture("authetication/login_with_google_error.json"));
-        when(dataSource.signInWithGoogle()).thenThrow(
+        when(() => dataSource.signInWithGoogle()).thenThrow(
           ServerException(
             code: 00,
             type: responseError["response"]["type"],
@@ -246,7 +251,7 @@ void main() {
           type: "Error",
           message: "Não foi possível realizar o login com o Google. Por favor, tente novamente.",
         ))));
-        verify(dataSource.signInWithGoogle());
+        verify(() => dataSource.signInWithGoogle());
         verifyNoMoreInteractions(dataSource); 
       });
     });
@@ -259,12 +264,12 @@ void main() {
         final response = await json.decode(fixture("authetication/current_user_success.json"));
         final user = UserModel.fromJson(response);
 
-        when(dataSource.currentUser()).thenAnswer((_) async => user);
-        when(preferencesService.save(key: "user_profile", value:user.toJson().toString())).thenAnswer((_) async => true);
+        when(() => dataSource.currentUser()).thenAnswer((_) async => user);
+        when(() => preferencesService.save(key: "user_profile", value:user.toJson().toString())).thenAnswer((_) async => true);
         //act
         await repository.currentUser();
         //assert
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
@@ -272,12 +277,12 @@ void main() {
       verifyInfoNetwork(false, () async{
         //arrange
         final response = await json.decode(fixture("authetication/current_user_success.json"));
-        when(dataSource.currentUser()).thenAnswer((_) async => response);
+        when(() =>dataSource.currentUser()).thenAnswer((_) async => response);
         //act
         final result = await repository.currentUser();
         //assert
         expect(result, equals(Left(NoConnectionFailure())));
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
@@ -286,14 +291,14 @@ void main() {
         //arrange
         final response = await json.decode(fixture("authetication/current_user_success.json"));
         final user = UserModel.fromJson(response);
-        when(dataSource.currentUser()).thenAnswer((_) async => user);
-        when(preferencesService.save(key: keyProfile, value: user.toJson().toString())).thenAnswer((_) async => true);
+        when(() => dataSource.currentUser()).thenAnswer((_) async => user);
+        when(() => preferencesService.save(key: keyProfile, value: user.toJson().toString())).thenAnswer((_) async => true);
         //act
         final result = await repository.currentUser();
         //assert
         expect(result?.isRight(), equals(true));
-        verify(preferencesService.save(key: keyProfile, value: user.toJson().toString()));
-        verify(dataSource.currentUser());
+        verify(() => preferencesService.save(key: keyProfile, value: user.toJson().toString()));
+        verify(() => dataSource.currentUser());
         verifyNoMoreInteractions(dataSource);
       });
     });
@@ -302,7 +307,7 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final responseError = await json.decode(fixture("authetication/current_user_error.json"));
-        when(dataSource.currentUser()).thenThrow(
+        when(() => dataSource.currentUser()).thenThrow(
           ServerException(
             code: 401,
             type: responseError["response"]["type"],
@@ -318,7 +323,7 @@ void main() {
             message: "Expired token",
           ),
         )));
-        verify(dataSource.currentUser());
+        verify(() => dataSource.currentUser());
         verifyNoMoreInteractions(dataSource);
       });
     });
@@ -329,23 +334,23 @@ void main() {
     test("should check if the device is online", (){
       verifyInfoNetwork(true, () async{
         //arrange
-        when(dataSource.logout()).thenAnswer((_) async => true);
+        when(() => dataSource.logout()).thenAnswer((_) async => true);
         //act
         await repository.logout();
         //assert
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
     test("should return NoConectedException if the device is offline", (){
       verifyInfoNetwork(false, () async{
         //arrange
-        when(dataSource.logout()).thenAnswer((_) async => true);
+        when(() => dataSource.logout()).thenAnswer((_) async => true);
         //act
         final result = await repository.logout();
         //assert
         expect(result, equals(Left(NoConnectionFailure())));
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
@@ -353,12 +358,12 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final response = await json.decode(fixture("authetication/logout_success.json"))["response"];
-        when(dataSource.logout()).thenAnswer((_) async => response["message"]);
+        when(() => dataSource.logout()).thenAnswer((_) async => response["message"]);
         //act
         final result = await repository.logout();
         //assert
         expect(result?.isRight(), equals(true));
-        verify(dataSource.logout());
+        verify(() => dataSource.logout());
         verifyNoMoreInteractions(dataSource);
       });
     });
@@ -367,7 +372,7 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final response = await json.decode(fixture("authetication/logout_error.json"))["response"];
-        when(dataSource.logout()).thenThrow(
+        when(() => dataSource.logout()).thenThrow(
           ServerException(
             code: 400, 
             type: response["type"], 
@@ -381,7 +386,7 @@ void main() {
             type: "logout_error", 
             message: "Não foi possível fazer o logout. Por favor, tente novamente."
         ))));
-        verify(dataSource.logout());
+        verify(() => dataSource.logout());
         verifyNoMoreInteractions(dataSource);
       });
     });
@@ -392,13 +397,13 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final refreshToken = await json.decode(fixture("authetication/login_success.json"))["refresh_token"];
-        when(sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
-        when(dataSource.refreshAccessToken(refreshToken)).thenAnswer((_) async => refreshToken);
-        when(sessionManager.setAccessToken(refreshToken)).thenAnswer((_) async => true);
+        when(() => sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
+        when(() => dataSource.refreshAccessToken(refreshToken)).thenAnswer((_) async => refreshToken);
+        when(() => sessionManager.setAccessToken(refreshToken)).thenAnswer((_) async => true);
         //act
         await repository.refreshAccessToken();
         //assert
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
@@ -406,12 +411,12 @@ void main() {
       verifyInfoNetwork(false, () async{
         //arrange
         final refreshToken = await json.decode(fixture("authetication/login_success.json"))["refresh_token"];
-        when(dataSource.refreshAccessToken("value")).thenAnswer((_) async => refreshToken);
+        when(() => dataSource.refreshAccessToken("value")).thenAnswer((_) async => refreshToken);
         //act
         final result = await repository.refreshAccessToken();
         //assert
         expect(result, equals(Left(NoConnectionFailure())));
-        verify(networkInfo.isConnected);
+        verify(() => networkInfo.isConnected);
       });
     });
 
@@ -419,16 +424,16 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final refreshToken = await json.decode(fixture("authetication/login_success.json"))["refresh_token"];
-        when(sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
-        when(dataSource.refreshAccessToken(refreshToken)).thenAnswer((_) async => refreshToken);
-        when(sessionManager.setAccessToken(refreshToken)).thenAnswer((_) async => true);
+        when(() => sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
+        when(() => dataSource.refreshAccessToken(refreshToken)).thenAnswer((_) async => refreshToken);
+        when(() => sessionManager.setAccessToken(refreshToken)).thenAnswer((_) async => true);
         //act
         final result = await repository.refreshAccessToken();
         //assert
         expect(result?.isRight(), equals(true));
-        verify(sessionManager.getRefreshToken());
-        verify(dataSource.refreshAccessToken(refreshToken));
-        verify(sessionManager.setAccessToken(refreshToken));
+        verify(() => sessionManager.getRefreshToken());
+        verify(() => dataSource.refreshAccessToken(refreshToken));
+        verify(() =>sessionManager.setAccessToken(refreshToken));
         verifyNoMoreInteractions(dataSource);
       });
     });
@@ -437,8 +442,8 @@ void main() {
       verifyInfoNetwork(true, () async{
         //arrange
         final refreshToken = await json.decode(fixture("authetication/login_success.json"))["refresh_token"];
-        when(sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
-        when(dataSource.refreshAccessToken(refreshToken)).thenThrow(
+        when(() => sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
+        when(() => dataSource.refreshAccessToken(refreshToken)).thenThrow(
           ServerException(
           code: 401, 
           type: "unauthorized", 
@@ -452,8 +457,8 @@ void main() {
             type: "unauthorized", 
             message: "Signature verification failed" 
         ))));
-        verify(sessionManager.getRefreshToken());
-        verify(dataSource.refreshAccessToken(refreshToken));
+        verify(() => sessionManager.getRefreshToken());
+        verify(() => dataSource.refreshAccessToken(refreshToken));
         verifyNoMoreInteractions(dataSource);
       });
     });

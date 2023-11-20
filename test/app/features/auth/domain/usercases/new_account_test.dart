@@ -1,9 +1,11 @@
+import 'package:authentication_flutter/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:authentication_flutter/app/features/auth/domain/entities/new_account_entity.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/new_account.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
-import '../../mocks/auth_mock.mocks.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockAuthRepository extends Mock implements AuthRepositoryImpl {}
 
 void main() {
   late NewAccount usercase;
@@ -23,13 +25,12 @@ void main() {
 
   test('should get bool when sending a new record to the repository', () async {
     //arrange
-    when(mockAuthRepository.signUp(entity))
-        .thenAnswer((_) async => const Right(true));
+    when(() => mockAuthRepository.signUp(entity)).thenAnswer((_) async => const Right(true));
     //act
     var result = await usercase(entity);
     //assert
     expect(result, equals(isA<Right>()));
-    verify(mockAuthRepository.signUp(entity));
+    verify(() => mockAuthRepository.signUp(entity));
     verifyNoMoreInteractions(mockAuthRepository);
   });
 }

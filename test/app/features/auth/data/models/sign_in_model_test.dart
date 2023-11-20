@@ -10,6 +10,8 @@ void main() {
 
   test('should be a subclass of Sign In Entity', () {
     expect(model, isA<SignInEntity>());
+    expect(model.email, equals('contato@devjonathancosta.com'));
+    expect(model.passwd, equals('12345678'));
   });
 
   test('should return a JSON map containing the proper data', () {
@@ -21,5 +23,17 @@ void main() {
       "passwd": "12345678"
     };
     expect(result, equals(expectedJsonMap));
+    expect(model.email, model.email);
+    expect(model.passwd, model.passwd);
+  });
+
+
+  test('ToString returns a formatted string representation', () {
+    // arrange
+    const signInModel = SignInModel(email: 'test@example.com', passwd: 'password123');
+    // act
+    final result = signInModel.toString();
+    // assert
+    expect(result, equals('{SignInModel: email:test@example.com, passwd:password123}'));
   });
 }

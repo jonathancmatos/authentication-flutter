@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:authentication_flutter/app/core/manager/user_manager_store.dart';
 import 'package:authentication_flutter/app/features/auth/data/models/account_model.dart';
@@ -40,13 +39,17 @@ class AuthDataSourceImpl extends AuthDataSource {
       );
 
       return response.statusCode == 200;
-    } on DioError catch (e) {
-      throw ServerException(response: e.response);
-    } on SocketException {
-      throw NoConnectionException();
-    } on Exception {
-      throw InternalException();
-    }
+
+    } on DioException catch (e){
+      if(e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout){
+        throw NoConnectionException();
+      }else if(e.type == DioExceptionType.badResponse){
+        final badResponse = e.response;
+        throw ServerException(response: badResponse);
+      }else{
+        throw InternalException();
+      }
+    } 
   }
 
   @override
@@ -64,13 +67,16 @@ class AuthDataSourceImpl extends AuthDataSource {
 
       return TokenModel.fromJson(response.data);
       
-    } on DioError catch (e) {
-      throw ServerException(response: e.response);
-    } on SocketException {
-      throw NoConnectionException();
-    } on Exception {
-      throw InternalException();
-    }
+    } on DioException catch (e){
+      if(e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout){
+        throw NoConnectionException();
+      }else if(e.type == DioExceptionType.badResponse){
+        final badResponse = e.response;
+        throw ServerException(response: badResponse);
+      }else{
+        throw InternalException();
+      }
+    } 
   }
 
    @override
@@ -97,13 +103,16 @@ class AuthDataSourceImpl extends AuthDataSource {
 
       return TokenModel.fromJson(response.data);
       
-    } on DioError catch (e) {
-      throw ServerException(response: e.response);
-    } on SocketException {
-      throw NoConnectionException();
-    } on Exception {
-      throw InternalException();
-    }
+    } on DioException catch (e){
+      if(e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout){
+        throw NoConnectionException();
+      }else if(e.type == DioExceptionType.badResponse){
+        final badResponse = e.response;
+        throw ServerException(response: badResponse);
+      }else{
+        throw InternalException();
+      }
+    } 
   }
   
   @override
@@ -111,19 +120,18 @@ class AuthDataSourceImpl extends AuthDataSource {
     try{
 
       final response = await httpService.get("/current-user");
-      if(response.statusCode == 200){
-        return UserModel.fromJson(response.data);
+      return UserModel.fromJson(response.data);
+
+    } on DioException catch (e){
+      if(e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout){
+        throw NoConnectionException();
+      }else if(e.type == DioExceptionType.badResponse){
+        final badResponse = e.response;
+        throw ServerException(response: badResponse);
+      }else{
+        throw InternalException();
       }
-
-      return throw InternalException();
-
-    } on DioError catch (e) {
-      throw ServerException(response: e.response);
-    } on SocketException {
-      throw NoConnectionException();
-    } on Exception {
-      throw InternalException();
-    }
+    } 
   }
   
   @override
@@ -140,13 +148,16 @@ class AuthDataSourceImpl extends AuthDataSource {
       final response = await httpService.post("/logout");
       return response.statusCode == 200;
 
-    }on DioError catch(e){
-      throw ServerException(response: e.response);
-    }on SocketException{
-      throw NoConnectionException();
-    } on Exception{
-      throw InternalException();
-    }
+    }on DioException catch (e){
+      if(e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout){
+        throw NoConnectionException();
+      }else if(e.type == DioExceptionType.badResponse){
+        final badResponse = e.response;
+        throw ServerException(response: badResponse);
+      }else{
+        throw InternalException();
+      }
+    } 
   }
   
   @override
@@ -164,13 +175,16 @@ class AuthDataSourceImpl extends AuthDataSource {
 
       return response.data["response"]["message"];
 
-    }on DioError catch(e){
-      throw ServerException(response: e.response);
-    }on SocketException{
-      throw NoConnectionException();
-    }on Exception{
-      throw InternalException();
-    }
+    }on DioException catch (e){
+      if(e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout){
+        throw NoConnectionException();
+      }else if(e.type == DioExceptionType.badResponse){
+        final badResponse = e.response;
+        throw ServerException(response: badResponse);
+      }else{
+        throw InternalException();
+      }
+    } 
   }
 
 }

@@ -1,8 +1,10 @@
+import 'package:authentication_flutter/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/regenerate_access_token.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
-import '../../mocks/auth_mock.mocks.dart';
+import 'package:mocktail/mocktail.dart';
+ 
+class MockAuthRepository extends Mock implements AuthRepositoryImpl {}
 
 void main() {
   late RegenerateAccessToken usercase;
@@ -15,12 +17,12 @@ void main() {
 
   test('should return true when calling the refresh token method', () async {
     //arrange
-    when(repository.refreshAccessToken()).thenAnswer((_) async => const Right(true));
+    when(() => repository.refreshAccessToken()).thenAnswer((_) async => const Right(true));
     //act
     final result = await usercase.call();
     //assert
     expect(result, equals(isA<Right>()));
-    verify(repository.refreshAccessToken());
+    verify(() => repository.refreshAccessToken());
     verifyNoMoreInteractions(repository);
   });
 }
