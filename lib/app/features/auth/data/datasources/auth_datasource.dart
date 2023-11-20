@@ -35,7 +35,7 @@ class AuthDataSourceImpl extends AuthDataSource {
     try {
       final formData = FormData.fromMap(model.toJson());
       final response = await httpService.post(
-        "$baseUrl/signup",
+        "/signup",
         data: formData,
       );
 
@@ -54,7 +54,7 @@ class AuthDataSourceImpl extends AuthDataSource {
     try {
       final formData = FormData.fromMap(model.toJson());
       final response = await httpService.post(
-        "$baseUrl/signin",
+        "/signin",
         data: formData,
       );
 
@@ -87,7 +87,7 @@ class AuthDataSourceImpl extends AuthDataSource {
 
       final formData = FormData.fromMap(model.toJson()); 
       final response = await httpService.post(
-        "$baseUrl/google-sign-in",
+        "/google-sign-in",
         data: formData,
       );
 
@@ -110,7 +110,7 @@ class AuthDataSourceImpl extends AuthDataSource {
   Future<UserModel>? currentUser() async{
     try{
 
-      final response = await httpService.get("$baseUrl/current-user");
+      final response = await httpService.get("/current-user");
       if(response.statusCode == 200){
         return UserModel.fromJson(response.data);
       }
@@ -137,7 +137,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         await googleAuth.logout();
       }
 
-      final response = await httpService.post("$baseUrl/logout");
+      final response = await httpService.post("/logout");
       return response.statusCode == 200;
 
     }on DioError catch(e){
@@ -154,7 +154,7 @@ class AuthDataSourceImpl extends AuthDataSource {
     try{
 
       final response = await httpService.post(
-        "$baseUrl/refresh-token",
+        "/refresh-token",
         data: FormData.fromMap({"refresh_token":refreshToken}),
       );
 

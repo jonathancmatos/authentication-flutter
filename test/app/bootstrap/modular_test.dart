@@ -3,15 +3,13 @@ import 'package:authentication_flutter/app/core/manager/user_manager_store.dart'
 import 'package:authentication_flutter/app/features/auth/domain/usercases/regenerate_access_token.dart';
 import 'package:authentication_flutter/app/services/storage/preferences_service.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:mockito/annotations.dart';
-import 'modular_test.mocks.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([
-  SessionManager,
-  PreferencesService,
-  UserManagerStore,
-  RegenerateAccessTokenImpl
-])
+class MockPreferencesService extends Mock implements PreferencesService {}
+class MockSessionManager extends Mock implements SessionManager {}
+class MockUserManagerStore extends Mock implements UserManagerStore {}
+class MockRegenerateAccessTokenImpl extends Mock implements RegenerateAccessTokenImpl{}
+
 
 class TestModule extends Module {
   @override

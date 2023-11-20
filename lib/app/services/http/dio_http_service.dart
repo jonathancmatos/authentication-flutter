@@ -2,12 +2,16 @@ import 'package:authentication_flutter/app/services/http/http_service.dart';
 import 'package:authentication_flutter/app/services/http/interceptors/my_http_interceptor.dart';
 import 'package:dio/dio.dart';
 
+const String baseUrl = "http://192.168.0.11/api-tokenization/api";
+
 class DioHttpService extends HttpService {
 
-  final Dio _dio;
+  late Dio _dio;
 
-  DioHttpService(this._dio) {
-    final interceptors = InterceptorsWrapper(
+  DioHttpService(Dio dio) {
+    _dio = dio;
+    _dio.options = _options;
+    _dio.interceptors.addAll([InterceptorsWrapper(
       onRequest: (options, handler) async{
         await MyHttpInterceptor().onRequest(options);
         return handler.next(options);
@@ -35,49 +39,44 @@ class DioHttpService extends HttpService {
           return handler.next(error);
         }
       }
-    );
-
-    _dio.interceptors.add(interceptors);
-  }
-
-  Dio get dio => _dio;
-
-  @override
-  Future<Response<T>> delete<T>(String? url, {data}) async {
-    return await _dio.delete(url ?? "", options: _getOptionsParams());
+    )]);
   }
 
   @override
-  Future<Response<T>> get<T>(String? url) async {
-    return await _dio.get(url ?? "", options: _getOptionsParams());
+  Future<Response<T>> delete<T>(String url) async {
+    return await _dio.delete(url);
   }
 
   @override
-  Future<Response<T>> patch<T>(String? url, {data}) async {
-    return await _dio.patch(url ?? "", data: data, options: _getOptionsParams());
+  Future<Response<T>> get<T>(String url) async {
+    return await _dio.get(url);
   }
 
   @override
-  Future<Response<T>> post<T>(String? url, {data}) async {
-    return await _dio.post(url ?? "", data: data, options: _getOptionsParams());
+  Future<Response<T>> patch<T>(String url, {data}) async {
+    return await _dio.patch(url, data: data);
   }
 
   @override
-  Future<Response<T>> put<T>(String? url, {data}) async {
-    return await _dio.put(url ?? "", data: data, options: _getOptionsParams());
+  Future<Response<T>> post<T>(String url, {data}) async {
+    return await _dio.post(url, data: data);
   }
 
-
-  Options _getOptionsParams() {
-    return Options(
-      headers: _defaultConfigHeader(),
-      contentType: Headers.jsonContentType,
-      responseType: ResponseType.json,
-      followRedirects: false,
-      sendTimeout: const Duration(milliseconds: 5000),
-      receiveTimeout: const Duration(milliseconds: 5000),
-    );
+  @override
+  Future<Response<T>> put<T>(String url, {data}) async {
+    return await _dio.put(url, data: data);
   }
+
+  BaseOptions get _options => BaseOptions(
+    baseUrl: baseUrl,
+    receiveDataWhenStatusError: true,
+    contentType: Headers.jsonContentType,
+    responseType: ResponseType.json,
+    followRedirects: false,
+    headers: _defaultConfigHeader(),
+    sendTimeout: const Duration(milliseconds: 5000),
+    receiveTimeout: const Duration(milliseconds: 5000),
+  );
 
   Map<String, dynamic> _defaultConfigHeader() {
     return {
