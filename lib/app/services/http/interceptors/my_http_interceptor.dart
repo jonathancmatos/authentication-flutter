@@ -8,10 +8,7 @@ class MyHttpInterceptor extends MyInterceptor<dynamic, dynamic, dynamic> {
  
   @override
   Future onRequest(dynamic request) async{
-    if (_getAccessToken.isNotEmpty){
-      request.headers["Authorization"] = "Bearer $_getAccessToken";
-    }
-
+    request.headers["Authorization"] = "Bearer $_getAccessToken";
     return request;
   }
 
@@ -23,13 +20,15 @@ class MyHttpInterceptor extends MyInterceptor<dynamic, dynamic, dynamic> {
   @override
   Future onError(error, {Function(dynamic options)? retry}) async{
     if(error.response != null && error.response.data != null){
-      Map failure = error.response.data["response"];
-      if(failure.containsKey("type") && failure["type"] == "token_expired"){
+      if(error.response.data.containsKey("response")){
+        Map failure = error.response.data["response"];
+        if(failure.containsKey("type") && failure["type"] == "token_expired"){
 
-        if(!await _generateAccessToken()) return;
-      
-        error.requestOptions.headers['Authorization'] = "Bearer $_getAccessToken";
-        await retry!(error.requestOptions);
+          if(!await _generateAccessToken()) return;
+        
+          error.requestOptions.headers['Authorization'] = "Bearer $_getAccessToken";
+          await retry!(error.requestOptions);
+        }
       }
     }
     return error;

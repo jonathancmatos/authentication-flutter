@@ -285,7 +285,7 @@ void main() {
 
     test('should return ServerException when there is a problem in the api', () async{
       //arrange
-      final response = await json.decode(fixture("authetication/login_with_email_error.json"));
+      final response = await json.decode(fixture("authetication/current_user_error.json"));
       when(() => mockHttpService.get('/current-user')).thenThrow(
         DioException(
           type: DioExceptionType.badResponse,
