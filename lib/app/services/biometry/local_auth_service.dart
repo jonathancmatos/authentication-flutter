@@ -12,7 +12,10 @@ class LocalAuthService extends BiometryService{
   Future<bool> checkBiometricsActivated() async{
     final List<BiometricType> availableBiometrics = await localAuthentication.getAvailableBiometrics();
     if(availableBiometrics.isEmpty) return false;
-    return availableBiometrics.contains(BiometricType.fingerprint);
+    
+    return availableBiometrics.contains(BiometricType.fingerprint)
+      || availableBiometrics.contains(BiometricType.strong)
+      || availableBiometrics.contains(BiometricType.weak);
   }
 
   @override
@@ -27,7 +30,7 @@ class LocalAuthService extends BiometryService{
     try{
       return await localAuthentication.authenticate(
         localizedReason: 'Autentique-se para continuar.',
-        options: const AuthenticationOptions(useErrorDialogs: false)
+        options: const AuthenticationOptions(biometricOnly: true)
       );
     }on PlatformException catch(e){ 
       if(e.code == auth_error.notAvailable){

@@ -58,7 +58,10 @@ class SignInScreen extends StatelessWidget {
                     //Button Login
                     CustomButton(
                       text: "ENTRAR",
-                      onPressed: store.signIn,
+                      onPressed: () => store.signIn(
+                        onSuccess: _onSuccess,
+                        onError: _onFailure
+                      ),
                       loading: store.isLoading,
                     ),
                     const SizedBox(height: 24),

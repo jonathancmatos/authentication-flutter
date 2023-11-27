@@ -46,10 +46,9 @@ abstract class _SignInStore with Store {
     required Function(Message message) onError,
     bool isSignSocial = false}) async {
 
-    if (isSignSocial) {
       _loading = true;
-
       final entity = SignInEntity(email: email, passwd: passwd);
+      
       final signInOrFailure = !isSignSocial 
         ? await signInWithEmail.call(entity)
         : await signInWithGoogle.call();
@@ -59,7 +58,6 @@ abstract class _SignInStore with Store {
         (failure) => onError(failureInExeptionConverted(failure)),
         (success) => onSuccess(),
       );
-    }
   }
 
 }

@@ -7,12 +7,14 @@ import 'package:authentication_flutter/app/features/auth/domain/usercases/logout
 import 'package:authentication_flutter/app/features/auth/domain/usercases/new_account.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/regenerate_access_token.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/sign_in_with_email.dart';
+import 'package:authentication_flutter/app/features/auth/presentation/home/states/home_store.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/signin/signin_screen.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/signin/states/signin_store.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/signup/signup_screen.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/signup/states/signup_store.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/home/home_screen.dart';
 import 'package:authentication_flutter/app/features/auth/presentation/welcome/welcome_screen.dart';
+import 'package:authentication_flutter/app/services/biometry/local_auth_service.dart';
 import 'package:authentication_flutter/app/services/http/dio_http_service.dart';
 import 'package:authentication_flutter/app/services/social/google_sign_in.dart';
 import 'package:authentication_flutter/app/services/storage/preferences_service.dart';
@@ -20,6 +22,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/guards/authentication_guard.dart';
 import 'features/auth/data/datasources/auth_datasource.dart';
@@ -38,9 +41,13 @@ class AppModule extends Module {
     Bind.factory((i) => Dio()),
     Bind.factory((i) => DioHttpService(i())),
 
-    // CORE -> GoogleSignIn
+    // Core -> GoogleSignIn
     Bind.factory((i) => GoogleSignIn()),
     Bind.factory((i) => GoogleAuthImpl(i())),
+
+    // Core -> LocalAuthentication
+    Bind.factory((i) => LocalAuthentication()),
+    Bind.factory((i) => LocalAuthService(i())),
 
     // Core -> Checked Network Connection
     Bind.factory((i) => InternetConnectionChecker()),
@@ -71,6 +78,10 @@ class AppModule extends Module {
       signInWithEmail: i<SignInWithEmailImpl>(),
       signInWithGoogle: i<SignInWithGoogleImpl>()
     )),
+    Bind.factory((i) => HomeStore(
+      biometryService: i<LocalAuthService>(), 
+      storageService: i<PreferencesService>()
+    ))
   ];
 
   @override
