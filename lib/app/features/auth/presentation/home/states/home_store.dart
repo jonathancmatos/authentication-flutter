@@ -79,7 +79,7 @@ abstract class _HomeStoreBase with Store {
     List list = await json.decode(result ?? '');
     if(list.contains(user?.email)){
       list.remove(user?.email ?? '');
-      storageService.save(key: _keyStorage, value: json.encode(list));
+      await storageService.save(key: _keyStorage, value: json.encode(list));
       isBiometryRegisted = false;
     }
   }

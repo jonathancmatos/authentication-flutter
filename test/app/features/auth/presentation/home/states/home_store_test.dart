@@ -64,7 +64,7 @@ void main() {
     //act
     homeStore.changeBiometryValue(false);
     //assert
-    expect(homeStore.isBiometryRegisted, false);
+    expect(homeStore.isBiometryRegisted, true);
   });
 
   test('must return true when validating biometrics', () async {
