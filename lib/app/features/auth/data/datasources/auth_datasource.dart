@@ -45,7 +45,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         throw NoConnectionException();
       }else if(e.type == DioExceptionType.badResponse){
         final badResponse = e.response;
-        throw ServerException(response: badResponse);
+        throw ServerException.fromData(badResponse);
       }else{
         throw InternalException();
       }
@@ -72,7 +72,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         throw NoConnectionException();
       }else if(e.type == DioExceptionType.badResponse){
         final badResponse = e.response;
-        throw ServerException(response: badResponse);
+        throw ServerException.fromData(badResponse);
       }else{
         throw InternalException();
       }
@@ -108,7 +108,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         throw NoConnectionException();
       }else if(e.type == DioExceptionType.badResponse){
         final badResponse = e.response;
-        throw ServerException(response: badResponse);
+        throw ServerException.fromData(badResponse);
       }else{
         throw InternalException();
       }
@@ -127,7 +127,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         throw NoConnectionException();
       }else if(e.type == DioExceptionType.badResponse){
         final badResponse = e.response;
-        throw ServerException(response: badResponse);
+        throw ServerException.fromData(badResponse);
       }else{
         throw InternalException();
       }
@@ -153,7 +153,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         throw NoConnectionException();
       }else if(e.type == DioExceptionType.badResponse){
         final badResponse = e.response;
-        throw ServerException(response: badResponse);
+        throw ServerException.fromData(badResponse);
       }else{
         throw InternalException();
       }
@@ -180,7 +180,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         throw NoConnectionException();
       }else if(e.type == DioExceptionType.badResponse){
         final badResponse = e.response;
-        throw ServerException(response: badResponse);
+        throw ServerException.fromData(badResponse);
       }else{
         throw InternalException();
       }

@@ -41,6 +41,9 @@ abstract class _SignInStore with Store {
   @computed
   String? get passwdValidator => passwd.isEmpty ? messagePasswdNotValid : null;
 
+  @computed
+  bool get isButtonEnable => email.isNotEmpty && passwd.isNotEmpty && !isLoading;
+
   Future<void> signIn({
     required VoidCallback onSuccess,
     required Function(Message message) onError,

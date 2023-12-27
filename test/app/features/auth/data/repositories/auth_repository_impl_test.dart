@@ -444,11 +444,11 @@ void main() {
         final refreshToken = await json.decode(fixture("authetication/login_success.json"))["refresh_token"];
         when(() => sessionManager.getRefreshToken()).thenAnswer((_) => refreshToken);
         when(() => dataSource.refreshAccessToken(refreshToken)).thenThrow(
-          ServerException(
-          code: 401, 
-          type: "unauthorized", 
-          message: "Signature verification failed"
-        ));
+          const ServerException(
+            code: 401, 
+            type: "unauthorized", 
+            message: "Signature verification failed"
+          ));
         //act
         final result = await repository.refreshAccessToken();
         //assert

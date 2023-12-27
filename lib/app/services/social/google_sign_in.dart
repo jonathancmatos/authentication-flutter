@@ -21,7 +21,7 @@ class GoogleAuthImpl implements GoogleAuth{
       return result == null;
 
     }catch(e){
-      throw ServerException(
+      throw const ServerException(
         message: 'Não foi possível sair da sua conta. Por favor, tente novamente.'
       );
     }
@@ -40,7 +40,7 @@ class GoogleAuthImpl implements GoogleAuth{
       return result;
 
     }catch(e){
-      throw ServerException(
+      throw const ServerException(
         message: 'Não foi possível realizar o login com o Google. Por favor, tente novamente.'
       );
     }

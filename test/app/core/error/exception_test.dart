@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:authentication_flutter/app/core/error/exception.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,7 +8,7 @@ void main() {
   test('ServerException properties are set correctly', () async{
     // arrange
     Response response = Response(data: json.decode(errorResponse), requestOptions: RequestOptions());
-    var serverException = ServerException(response: response);
+    var serverException = ServerException.fromData(response);
 
     // assert
     expect(serverException, isA<ServerException>());
@@ -17,7 +16,7 @@ void main() {
 
   test('ServerException properties are set correctly', () {
     // arrange
-    final serverException = ServerException(
+    const serverException = ServerException(
       type: 'Error',
       message: 'Error Server'
     );

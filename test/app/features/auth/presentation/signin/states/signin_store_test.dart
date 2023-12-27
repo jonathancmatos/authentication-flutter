@@ -26,6 +26,11 @@ void main() {
     );
   });
 
+  test('should return false in isButtonEnable', () {
+    // assert
+    expect(signInStore.isButtonEnable, false);
+  });
+
   test('should validate email properly', () {
     // arrange
     signInStore.setEmail('invalidemail'); 

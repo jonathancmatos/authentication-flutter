@@ -62,7 +62,7 @@ class SignInScreen extends StatelessWidget {
                         onSuccess: _onSuccess,
                         onError: _onFailure
                       ),
-                      loading: store.isLoading,
+                      loading: !store.isButtonEnable,
                     ),
                     const SizedBox(height: 24),
                     //Button Sign Google

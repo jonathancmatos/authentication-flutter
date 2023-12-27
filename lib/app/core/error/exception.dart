@@ -2,20 +2,18 @@ import 'package:authentication_flutter/app/core/error/entities/error_response.da
 
 class ServerException extends ErrorResponse implements Exception {
 
-  ServerException({
-    dynamic response,
+  const ServerException({
     int code = 00,
     String type = "Error",
     String message = "O servidor retornou um erro inesperado.",
-  }) : super(code: code, type: type, message: message){
+  }) : super(code: code, type: type, message: message);
 
-    if (response != null && response.data != null) {
-      final error = response.data;
-      code = response.statusCode ?? this.code;
-      type = error["response"]["type"] ?? this.type;
-      message = error["response"]["message"] ?? this.message;
-    }
-
+  factory ServerException.fromData(dynamic response){
+    return ServerException(
+      code: response.statusCode ?? 00,
+      type: response.data["response"]["type"],
+      message: response.data["response"]["message"]
+    );
   }
 }
 

@@ -23,6 +23,13 @@ mixin _$SignInStore on _SignInStore, Store {
           Computed<String?>(() => super.passwdValidator,
               name: '_SignInStore.passwdValidator'))
       .value;
+  Computed<bool>? _$isButtonEnableComputed;
+
+  @override
+  bool get isButtonEnable =>
+      (_$isButtonEnableComputed ??= Computed<bool>(() => super.isButtonEnable,
+              name: '_SignInStore.isButtonEnable'))
+          .value;
 
   late final _$_loadingAtom =
       Atom(name: '_SignInStore._loading', context: context);
@@ -101,7 +108,8 @@ mixin _$SignInStore on _SignInStore, Store {
 email: ${email},
 passwd: ${passwd},
 emailValidator: ${emailValidator},
-passwdValidator: ${passwdValidator}
+passwdValidator: ${passwdValidator},
+isButtonEnable: ${isButtonEnable}
     ''';
   }
 }
