@@ -1,36 +1,25 @@
+import 'package:authentication_flutter/app/features/auth/domain/usercases/regenerate_access_token.dart';
 import 'package:authentication_flutter/app/services/http/dio_http_service.dart';
-import 'package:authentication_flutter/app/services/http/interceptors/my_http_interceptor.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http_mock_adapter/http_mock_adapter.dart';
+import 'package:mocktail/mocktail.dart';
 import '../../bootstrap/modular_test.dart';
 
+class MockRegenerateAccessTokenImpl extends Mock implements RegenerateAccessTokenImpl {}
+
 void main() {
+  
   late DioHttpService dioHttpService;
   late Dio dio;
   late DioAdapter dioAdapter;
-  late MyHttpInterceptor myInterceptor = MyHttpInterceptor();
 
   const Map jsonRequest = {"data":true};
 
   setUpAll(() {
     Modular.init(TestModule());
     dio = Dio(BaseOptions(baseUrl: baseUrl));
-    dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async{
-        await myInterceptor.onRequest(options);
-        handler.next(options);
-      },
-      onResponse: (response, handler) async{
-        await myInterceptor.onResponse(response);
-        handler.next(response);
-      },
-      onError: (error, handler) async{
-        await myInterceptor.onError(error);
-        handler.next(error);
-      }
-    ));
 
     dioAdapter = DioAdapter(dio: dio);
     dioHttpService = DioHttpService(dio);
@@ -60,7 +49,7 @@ void main() {
         ),
       ));
       //assert
-      await expectLater(dio.post("/post"),throwsA(isA<DioException>()));
+      await expectLater(dioHttpService.post("/post"),throwsA(isA<DioException>()));
     });
   });
 
@@ -88,7 +77,7 @@ void main() {
         ),
       ));
       //assert
-      await expectLater(dio.put("/put"),throwsA(isA<DioException>()));
+      await expectLater(dioHttpService.put("/put"),throwsA(isA<DioException>()));
     });
   });
 
@@ -116,7 +105,7 @@ void main() {
         ),
       ));
       //assert
-      await expectLater(dio.patch("/patch"),throwsA(isA<DioException>()));
+      await expectLater(dioHttpService.patch("/patch"),throwsA(isA<DioException>()));
     });
   });
 
@@ -131,29 +120,6 @@ void main() {
       expect(result.statusCode, equals(200));
     });
 
-    // test('must fall into the refresh token flow', () async {
-    //   //arrange
-    //   final erroMap = {
-    //     "response": {
-    //       "type": "token_expired",
-    //       "message": "Expired token"
-    //     }
-    //   };
-
-    //   dioAdapter.onGet("/get", (server) => server.throws(
-    //     400, DioException(
-    //       requestOptions: RequestOptions(),
-    //       response: Response(
-    //         data: erroMap,
-    //         statusCode: 400,
-    //         requestOptions: RequestOptions(),
-    //       ),
-    //     )));
-        
-    //   //assert
-    //   await expectLater(dio.get("/get"),throwsA(isA<DioException>()));
-    // });
-    
     test('should call method get failure', () async {
       //arrange
       dioAdapter.onGet("/get", (server) => server.throws(
@@ -166,7 +132,7 @@ void main() {
           ),
         )));
       //assert
-      await expectLater(dio.get("/get"),throwsA(isA<DioException>()));
+      await expectLater(dioHttpService.get("/get"),throwsA(isA<DioException>()));
     });
   });
 
@@ -193,7 +159,8 @@ void main() {
           ),
         )));
       //assert
-      await expectLater(dio.delete("/delete"),throwsA(isA<DioException>()));
+      await expectLater(dioHttpService.delete("/delete"),throwsA(isA<DioException>()));
     });
   });
+  
 }

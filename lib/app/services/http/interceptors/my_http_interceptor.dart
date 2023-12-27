@@ -2,13 +2,17 @@ import 'package:authentication_flutter/app/core/manager/session_manager.dart';
 import 'package:authentication_flutter/app/core/manager/user_manager_store.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/regenerate_access_token.dart';
 import 'package:authentication_flutter/app/services/http/http_service.dart';
+import 'package:authentication_flutter/app/services/http/unauthorized_request_retrier.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class MyHttpInterceptor extends MyInterceptor<dynamic, dynamic, dynamic> {
- 
+
+
   @override
-  Future onRequest(dynamic request) async{
-    request.headers["Authorization"] = "Bearer $_getAccessToken";
+  Future onRequest(dynamic request) async {
+    if(_getAccessToken.isNotEmpty){
+       request.headers["Authorization"] = "Bearer $_getAccessToken";
+    }
     return request;
   }
 
@@ -18,25 +22,31 @@ class MyHttpInterceptor extends MyInterceptor<dynamic, dynamic, dynamic> {
   }
 
   @override
-  Future onError(error, {Function(dynamic options)? retry}) async{
-    if(error.response != null && error.response.data != null){
-      if(error.response.data.containsKey("response")){
-        Map failure = error.response.data["response"];
-        if(failure.containsKey("type") && failure["type"] == "token_expired"){
-
-          if(!await _generateAccessToken()) return;
+  Future onError(error, handler) async {
+    if (error.response != null && error.response.data != null) {
+      if (error.response.data.containsKey("response")) {
         
-          error.requestOptions.headers['Authorization'] = "Bearer $_getAccessToken";
-          await retry!(error.requestOptions);
+        Map failure = error.response.data["response"];
+        if (failure.containsKey("type") && failure["type"] == "token_expired") {
+          
+          if (await _generateAccessToken()){
+            final options = await error.requestOptions;
+            await Modular.get<UnauthorizedRequestRetrierImpl>()
+              .retry(options: options)
+                .then((response) => handler.resolve(response))
+                .onError((error, stackTrace) => error);
+   
+          }
         }
       }
     }
     return error;
   }
 
-  Future<bool> _generateAccessToken() async{
+
+  Future<bool> _generateAccessToken() async {
     final result = await Modular.get<RegenerateAccessTokenImpl>().call();
-    if(result!.isLeft()){
+    if (result!.isLeft()) {
       await Modular.get<UserManagerStore>().logoff(isExpiredToken: true);
       return false;
     }
@@ -44,5 +54,4 @@ class MyHttpInterceptor extends MyInterceptor<dynamic, dynamic, dynamic> {
   }
 
   String get _getAccessToken => Modular.get<SessionManager>().getAccessToken() ?? '';
-  
 }

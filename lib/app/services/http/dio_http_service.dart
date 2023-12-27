@@ -1,8 +1,9 @@
 import 'package:authentication_flutter/app/services/http/http_service.dart';
 import 'package:authentication_flutter/app/services/http/interceptors/my_http_interceptor.dart';
 import 'package:dio/dio.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-const String baseUrl = "http://192.168.0.11/api-tokenization/api";
+const String baseUrl = "http://192.168.0.10/api-tokenization/api";
 
 class DioHttpService extends HttpService {
 
@@ -11,6 +12,12 @@ class DioHttpService extends HttpService {
   DioHttpService(Dio dio) {
     _dio = dio;
     _dio.options = _options;
+
+    _dio.interceptors.add(PrettyDioLogger(
+      requestHeader: true,
+      requestBody: true,
+      responseBody: true,
+    ));
     _dio.interceptors.addAll([InterceptorsWrapper(
       onRequest: (options, handler) async{
         await MyHttpInterceptor().onRequest(options);
@@ -21,23 +28,8 @@ class DioHttpService extends HttpService {
         return handler.next(response);
       },
       onError: (error, handler) async{
-        bool errorAlreadySolved = false;
-        await MyHttpInterceptor().onError(error, retry: (options) async{
-          final retryResponse = await _dio.request(
-            options.path,
-            data: options.data,
-            options: Options(
-              method: options.method,
-              headers: options.headers,
-            )
-          );
-          errorAlreadySolved = true;
-          return handler.resolve(retryResponse);
-        });
-
-        if(!errorAlreadySolved) {
-          return handler.next(error);
-        }
+        await MyHttpInterceptor().onError(error, handler);
+        return handler.next(error);
       }
     )]);
   }

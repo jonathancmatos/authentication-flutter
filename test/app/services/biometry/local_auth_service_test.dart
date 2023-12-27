@@ -18,12 +18,17 @@ void main() {
 
   test("should return true check biometrics activated", () async{
     //arrange
-    when(() => mockLocalAuthService.getAvailableBiometrics()).thenAnswer((_) async =>[BiometricType.fingerprint]);
+    when(() => mockLocalAuthService.getAvailableBiometrics()).thenAnswer((_) async =>[
+      BiometricType.fingerprint,
+      BiometricType.strong,
+      BiometricType.weak,
+    ]);
     //act
     final result = await localAuthService.checkBiometricsActivated();
     //assert
     expect(result, equals(true));
   });
+  
 
   test("should return false check biometrics activated", () async{
     //arrange
@@ -58,7 +63,7 @@ void main() {
     //arrange
     when(() => mockLocalAuthService.authenticate(
       localizedReason: 'Autentique-se para continuar.',
-      options: const AuthenticationOptions(useErrorDialogs: false)
+      options: const AuthenticationOptions(biometricOnly: true)
     )).thenAnswer((_) async => true);
     //act
     final result = await localAuthService.validateBiometrics();
@@ -70,7 +75,7 @@ void main() {
     //arrange
     when(() => mockLocalAuthService.authenticate(
       localizedReason: 'Autentique-se para continuar.',
-      options: const AuthenticationOptions(useErrorDialogs: false)
+      options: const AuthenticationOptions(biometricOnly: true)
     )).thenThrow(PlatformException(code: 'NotAvailable'));
     //act && assert
     expect(() => localAuthService.validateBiometrics(), throwsA(isA<Exception>()));
@@ -80,7 +85,7 @@ void main() {
     //arrange
     when(() => mockLocalAuthService.authenticate(
       localizedReason: 'Autentique-se para continuar.',
-      options: const AuthenticationOptions(useErrorDialogs: false)
+      options: const AuthenticationOptions(biometricOnly: true)
     )).thenThrow(PlatformException(code: 'NotEnrolled'));
     //act && assert
     expect(() => localAuthService.validateBiometrics(), throwsA(isA<Exception>()));
@@ -90,7 +95,7 @@ void main() {
     //arrange
     when(() => mockLocalAuthService.authenticate(
       localizedReason: 'Autentique-se para continuar.',
-      options: const AuthenticationOptions(useErrorDialogs: false)
+      options: const AuthenticationOptions(biometricOnly: true)
     )).thenThrow(PlatformException(code: 'error'));
     //act && assert
     expect(() => localAuthService.validateBiometrics(), throwsA(isA<Exception>()));

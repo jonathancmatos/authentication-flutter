@@ -13,7 +13,7 @@ class PreferencesService implements StorageService {
   }
 
   @override
-  String? read({required String key}) {
+  String? read({required String key}){
     return _preferences.getString(key);
   }
 

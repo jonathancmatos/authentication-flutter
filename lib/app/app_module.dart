@@ -16,6 +16,7 @@ import 'package:authentication_flutter/app/features/auth/presentation/home/home_
 import 'package:authentication_flutter/app/features/auth/presentation/welcome/welcome_screen.dart';
 import 'package:authentication_flutter/app/services/biometry/local_auth_service.dart';
 import 'package:authentication_flutter/app/services/http/dio_http_service.dart';
+import 'package:authentication_flutter/app/services/http/unauthorized_request_retrier.dart';
 import 'package:authentication_flutter/app/services/social/google_sign_in.dart';
 import 'package:authentication_flutter/app/services/storage/preferences_service.dart';
 import 'package:dio/dio.dart';
@@ -40,6 +41,7 @@ class AppModule extends Module {
     // Core -> DIO
     Bind.factory((i) => Dio()),
     Bind.factory((i) => DioHttpService(i())),
+    Bind.factory((i) => UnauthorizedRequestRetrierImpl(i())),
 
     // Core -> GoogleSignIn
     Bind.factory((i) => GoogleSignIn()),

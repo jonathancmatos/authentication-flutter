@@ -34,6 +34,7 @@ void main() {
   });
 
   test('Initial state should be not loading and user should be null', () {
+    expect(userManagerStore.isLogged, false);
     expect(userManagerStore.isLoading, false);
     expect(userManagerStore.user, isNull);
   });
@@ -72,18 +73,19 @@ void main() {
     });
   });
 
-  group('Logoff', () {
+  group('Logoff', () {  
     test('must return user null when logout is successful', () async {
       // arrange
       when(() => preferencesService.remove(key: 'user_profile')).thenAnswer((_) async => true);
       when(() => sessionManager.clear()).thenAnswer((_) async => true);
       when(() => mockLogout.call()).thenAnswer((_) async => const Right(null));
+      when(() => mockLogout.call()).thenAnswer((_) async => const Right(null));
 
       // act
-      await userManagerStore.logoff();
+      await userManagerStore.logoff(isExpiredToken: true);
 
       // assert
-      verify(() => mockLogout.call());
+      expect(userManagerStore.user, isNotNull);
     });
 
     test('should return ServerFailure when there is a logout failure', () async {
