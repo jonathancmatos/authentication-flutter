@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:authentication_flutter/app/core/manager/session_manager.dart';
 import 'package:authentication_flutter/app/core/manager/user_manager_store.dart';
 import 'package:authentication_flutter/app/features/auth/domain/usercases/regenerate_access_token.dart';
@@ -6,7 +8,6 @@ import 'package:authentication_flutter/app/services/http/unauthorized_request_re
 import 'package:flutter_modular/flutter_modular.dart';
 
 class MyHttpInterceptor extends MyInterceptor<dynamic, dynamic, dynamic> {
-
 
   @override
   Future onRequest(dynamic request) async {
@@ -22,7 +23,7 @@ class MyHttpInterceptor extends MyInterceptor<dynamic, dynamic, dynamic> {
   }
 
   @override
-  Future onError(error, handler) async {
+  Future onError(error, Function(dynamic result)? onResolver) async {
     if (error.response != null && error.response.data != null) {
       if (error.response.data.containsKey("response")) {
         
@@ -32,14 +33,18 @@ class MyHttpInterceptor extends MyInterceptor<dynamic, dynamic, dynamic> {
           if (await _generateAccessToken()){
             final options = await error.requestOptions;
             await Modular.get<UnauthorizedRequestRetrierImpl>()
-              .retry(options: options)
-                .then((response) => handler.resolve(response))
-                .onError((error, stackTrace) => error);
-   
+              .retry(
+                options: options,
+                retryIf: (e) => e is SocketException || e is TimeoutException,
+              )
+              .then((response) => onResolver!(response))
+              .onError((e, stackTrace) => onResolver!(null));
           }
+          return;
         }
       }
     }
+    onResolver!(null);
     return error;
   }
 

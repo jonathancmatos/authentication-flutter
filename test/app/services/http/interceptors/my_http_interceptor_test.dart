@@ -27,6 +27,7 @@ void main() {
     mockHttpService = MockHttpService();
   });
 
+
   test('should call _generateAccessToken on token_expired error', () async {
     // arrange
     final responseError = await json.decode(fixture("authetication/current_user_error.json"));
@@ -63,11 +64,13 @@ void main() {
     when(() => Modular.get<RegenerateAccessTokenImpl>().call())
       .thenAnswer((_) async => const Right(true));
 
-    when(() => Modular.get<UnauthorizedRequestRetrierImpl>().retry(options: any(named: 'options')))
-      .thenAnswer((_) async => successResponse);
+    when(() => Modular.get<UnauthorizedRequestRetrierImpl>().retry(
+      options: any(named: 'options'),
+      retryIf: any(named: 'retryIf'),
+    )).thenAnswer((_) async => successResponse);
 
     // act
-    await myHttpInterceptor.onError(errorResponse, mockHttpService);
+    await myHttpInterceptor.onError(errorResponse, ((result) => result));
 
     // assert
     verifyNever((() => Modular.get<UserManagerStore>().logoff(isExpiredToken: true)));
@@ -101,7 +104,7 @@ void main() {
       .thenAnswer((_) async => const Right(true));    
 
     // act
-    await myHttpInterceptor.onError(errorResponse, mockHttpService);
+    await myHttpInterceptor.onError(errorResponse, ((result) => null));
 
     // assert
     verify(() => Modular.get<UserManagerStore>().logoff(isExpiredToken: true));

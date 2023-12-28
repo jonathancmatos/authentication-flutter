@@ -41,7 +41,7 @@ class AppModule extends Module {
     // Core -> DIO
     Bind.factory((i) => Dio()),
     Bind.factory((i) => DioHttpService(i())),
-    Bind.factory((i) => UnauthorizedRequestRetrierImpl(i())),
+    Bind.factory((i) => UnauthorizedRequestRetrierImpl(i<DioHttpService>())),
 
     // Core -> GoogleSignIn
     Bind.factory((i) => GoogleSignIn()),

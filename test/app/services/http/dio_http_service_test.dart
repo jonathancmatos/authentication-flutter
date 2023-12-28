@@ -22,7 +22,7 @@ void main() {
     dio = Dio(BaseOptions(baseUrl: baseUrl));
 
     dioAdapter = DioAdapter(dio: dio);
-    dioHttpService = DioHttpService(dio);
+    dioHttpService = DioHttpService(dio, testIgnore: true);
   });
 
   group('POST', () {

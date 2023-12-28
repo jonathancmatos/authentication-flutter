@@ -6,24 +6,45 @@ abstract class UnauthorizedRequestRetrier<TResponse>{
 
 class UnauthorizedRequestRetrierImpl implements UnauthorizedRequestRetrier{
 
-  final HttpService httpService;
-  UnauthorizedRequestRetrierImpl(this.httpService);
+  final HttpService _httpService;
+  UnauthorizedRequestRetrierImpl(this._httpService);
 
   @override
-  Future retry({required options}) async{
-    switch(options.method.toString().toLowerCase()){
-      case "post":
-        return await httpService.post(options.path, data: options.data);
-      case "get":
-        return await httpService.get(options.path);
-      case "put":
-        return await httpService.put(options.path, data: options.data);
-      case "delete":
-        return await httpService.delete(options.path);
-      case "patch":
-        return await httpService.patch(options.path, data: options.data);
-      default:
-        return throw(Exception('Invalid request method.'));        
+  Future retry({
+    required options, 
+    int attemps = 3, 
+    Duration retryDelay = const Duration(seconds: 3),
+    Function(Object e)? retryIf
+  }) async{
+
+    int retryAttemps = 0;
+    late Object exception;
+
+    while(retryAttemps < attemps){
+      try{
+        switch(options.method.toString().toLowerCase()){
+          case "post":
+            return await _httpService.post(options.path, data: options.data);
+          case "get":
+            return await _httpService.get(options.path);
+          case "put":
+            return await _httpService.put(options.path, data: options.data);
+          case "delete":
+            return await _httpService.delete(options.path);
+          case "patch":
+            return await _httpService.patch(options.path, data: options.data);
+          default:
+            return throw(Exception('Invalid request method.'));        
+        }
+      }catch(e){
+        exception = e;
+        if(retryIf == null || !retryIf(e)){
+          rethrow;
+        }
+      }
+      retryAttemps++;
+      await Future.delayed(retryDelay);
     }
+    throw exception;
   }
 }

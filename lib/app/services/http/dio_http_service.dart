@@ -8,11 +8,15 @@ const String baseUrl = "http://192.168.0.10/api-tokenization/api";
 class DioHttpService extends HttpService {
 
   late Dio _dio;
+  late bool _testIgnore;
+  final MyHttpInterceptor _myHttpInterceptor = MyHttpInterceptor();
 
-  DioHttpService(Dio dio) {
+  DioHttpService(Dio dio, {bool testIgnore = false}) {
     _dio = dio;
     _dio.options = _options;
+    _testIgnore = testIgnore;
 
+    _dio.interceptors.clear();
     _dio.interceptors.add(PrettyDioLogger(
       requestHeader: true,
       requestBody: true,
@@ -20,16 +24,22 @@ class DioHttpService extends HttpService {
     ));
     _dio.interceptors.addAll([InterceptorsWrapper(
       onRequest: (options, handler) async{
-        await MyHttpInterceptor().onRequest(options);
+        await _myHttpInterceptor.onRequest(options);
         return handler.next(options);
       },
       onResponse: (response, handler) async{
-        await MyHttpInterceptor().onResponse(response);
+        await _myHttpInterceptor.onResponse(response);
         return handler.next(response);
       },
       onError: (error, handler) async{
-        await MyHttpInterceptor().onError(error, handler);
-        return handler.next(error);
+        if(_testIgnore) return handler.next(error);
+        await _myHttpInterceptor.onError(error, (result){
+          if(result != null){
+            return handler.resolve(result);
+          }else if(error.response != null){
+            return handler.next(error);
+          }
+        });
       }
     )]);
   }
