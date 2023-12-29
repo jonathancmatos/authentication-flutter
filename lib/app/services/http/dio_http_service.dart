@@ -3,7 +3,7 @@ import 'package:authentication_flutter/app/services/http/interceptors/my_http_in
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-const String baseUrl = "http://192.168.0.10/api-tokenization/api";
+const String baseUrl = "http://192.168.0.7/api-tokenization/api";
 
 class DioHttpService extends HttpService {
 
@@ -16,13 +16,7 @@ class DioHttpService extends HttpService {
     _dio.options = _options;
     _testIgnore = testIgnore;
 
-    _dio.interceptors.clear();
-    _dio.interceptors.add(PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
-    ));
-    _dio.interceptors.addAll([InterceptorsWrapper(
+    _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async{
         await _myHttpInterceptor.onRequest(options);
         return handler.next(options);
@@ -41,7 +35,13 @@ class DioHttpService extends HttpService {
           }
         });
       }
-    )]);
+    ));
+    
+    _dio.interceptors.add(PrettyDioLogger(
+      requestHeader: true,
+      requestBody: true,
+      responseBody: true,
+    ));
   }
 
   @override
